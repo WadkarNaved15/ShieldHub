@@ -1,0 +1,21 @@
+# Node.js dependencies
+node_modules/
+package-lock.json
+
+# Logs
+logs/
+*.log
+
+# Environment variables & Secrets
+.env
+*.env
+config/*.json
+Backend/*.json
+
+# Cache & Build files
+dist/
+.cache/
+.vscode/
+.DS_Store
+
+hershield-47214-firebase-adminsdk-fbsvc-7fa16ff798.json

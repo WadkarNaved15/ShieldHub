@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "309833942582",
+    "project_id": "hershield-449410",
+    "storage_bucket": "hershield-449410.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:309833942582:android:60e9044a84d9c0547b7a97",
+        "android_client_info": {
+          "package_name": "com.hershield"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDfatvmOTrC79FIIv6h3T4dsWbWOq78Fu4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
