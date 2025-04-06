@@ -86,6 +86,8 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+        def MAPS_API_KEY = project.hasProperty("MAPS_API_KEY") ? project.getProperty("MAPS_API_KEY") : ""
+        resValue "string", "google_maps_api_key", MAPS_API_KEY
     }
     signingConfigs {
         debug {
