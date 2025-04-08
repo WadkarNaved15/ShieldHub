@@ -10,7 +10,8 @@ logs/
 .env
 *.env
 config/*.json
-Backend/*.json
+
+
 
 # Cache & Build files
 dist/
@@ -19,3 +20,5 @@ dist/
 .DS_Store
 
 hershield-47214-firebase-adminsdk-fbsvc-7fa16ff798.json
+
+!config/.keep
