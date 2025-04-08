@@ -1,6 +1,6 @@
 const React = require('react');
 const { useState, useEffect,useContext } = require('react');
-const { View, Text, TouchableOpacity, ScrollView, SafeAreaView ,Alert,Image,PermissionsAndroid,StyleSheet} = require('react-native');
+const { View, Text, TouchableOpacity, ScrollView, SafeAreaView ,Alert,Image,PermissionsAndroid,StyleSheet,ActivityIndicator} = require('react-native');
 const { Home, Map, Bell, Users, Phone, Shield, AlertCircle, CheckCircle2, Clock, Activity, School, MapPin } = require('lucide-react-native');
 var GetLocation = require('react-native-get-location').default;
 const MapView = require('react-native-maps').default;
@@ -10,6 +10,7 @@ const RNAndroidLocationEnabler = require('react-native-android-location-enabler'
 const  apiCall  = require('../../functions/axios');
 const { UserContext } = require('../../Context/User');
 const { LocationContext } = require('../../Context/Location');
+const {useNavigation} = require('@react-navigation/native');
 
 function NavigationButton({ Icon, label, isActive, onPress }) {
   return (
@@ -40,6 +41,7 @@ function KidSafeHome() {
   const [placeLocation, setPlaceLocation] = useState('school');
   const defaultMaleImage = require('./../../assets/male.png');
   const defaultFemaleImage = require('./../../assets/female.png');
+  const navigation = useNavigation();
 
   const region = {
     latitude: location?.latitude,
@@ -218,7 +220,7 @@ function KidSafeHome() {
         <NavigationButton Icon={Home} label="Home" isActive={activeTab === 'home'} onPress={() => setActiveTab('home')} />
         <NavigationButton Icon={Map} label="Journey" isActive={activeTab === 'journey'} onPress={() => setActiveTab('journey')} />
         <NavigationButton Icon={Bell} label="Alerts" isActive={activeTab === 'alerts'} onPress={() => setActiveTab('alerts')} />
-        <NavigationButton Icon={Users} label="Profile" isActive={activeTab === 'profile'} onPress={() => setActiveTab('profile')} />
+        <NavigationButton Icon={Users} label="Profile" isActive={activeTab === 'profile'} onPress={() => navigation.navigate('Modules')} />
       </View>
     </SafeAreaView>
   );

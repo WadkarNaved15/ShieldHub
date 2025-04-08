@@ -2,19 +2,29 @@ const React = require('react');
 const { useEffect, useContext } = React;
 const { View, Text, StyleSheet, Image, ActivityIndicator } = require('react-native');
 const { UserContext } = require('../Context/User');
+const {getToken} = require('../functions/secureStorage');
 
 const LogoScreen = ({ navigation }) => {
     const { isAuthenticated, loading } = useContext(UserContext);
 
     useEffect(() => {
-        if (!loading) {
+        const checkModule = async () => {
+          if (!loading) {
             if (isAuthenticated) {
-                navigation.replace('Home');
+              const module = await getToken('module');
+              if (module) {
+                navigation.replace(module);
+              }else{
+                navigation.replace('Modules');
+              }
             } else {
-                navigation.replace('Login');
+              navigation.replace('Login');
             }
-        }
-    }, [loading, isAuthenticated, navigation]);
+          }
+        };
+      
+        checkModule();
+      }, [loading, isAuthenticated, navigation]);
 
     return (
         <View style={styles.splashContainer}>

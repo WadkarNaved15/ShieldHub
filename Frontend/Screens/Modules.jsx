@@ -13,6 +13,7 @@ const {
     Settings,
   } = require('lucide-react-native');
 const { navigate } = require('../services/navigationService');
+const {saveToken} = require('../functions/secureStorage');
 
 // Mock user data
 const user = {
@@ -66,9 +67,13 @@ const modules = [
 ];
 
 const ModuleCard = ({ module }) => {
+  function handleModulePress() {
+    saveToken("module",module.navigateTo);
+    navigate(module.navigateTo);
+  }
   const Icon = module.icon;
   return (
-    <TouchableOpacity onPress={() => navigate(module.navigateTo)}>
+    <TouchableOpacity onPress={() => handleModulePress()}>
     <View style={[styles.moduleCard, { backgroundColor: module.color[0] }]}>
       <View style={styles.cardHeader}>
         <View style={styles.iconContainer}>
