@@ -26,6 +26,7 @@ const FacialRecognition = require('./Screens/FacialRecognition');
 const Marketplace = require('./Screens/HerShield/Marketplace');
 const Modules = require('./Screens/Modules');
 const KidSafeHome = require('./Screens/KidSafe/Home');
+const EmergencyInfo = require('./Screens/HerShield/EmergencyInfo');
 
 const { FeelingUnsafeProvider } = require('./Context/FeelingUnsafe');
 const { UserProvider, UserContext } = require('./Context/User');
@@ -135,6 +136,7 @@ function AppContent() {
         <Stack.Screen name="EmergencyNotifications" component={EmergencyNotificationsScreen} />
         <Stack.Screen name="FeelingUnsafe" component={FeelingUnsafe} />
         <Stack.Screen name="FacialRecognition" component={FacialRecognition} />
+        <Stack.Screen name="EmergencyInfo" component={EmergencyInfo} />
         {/* <Stack.Screen name="HelperRoute" component={HelperRoute} /> */}
         <Stack.Screen name="Marketplace" component={Marketplace} />
         <Stack.Screen name="Modules" component={Modules} />

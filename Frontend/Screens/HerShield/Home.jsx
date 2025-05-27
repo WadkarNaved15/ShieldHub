@@ -114,6 +114,7 @@ const { LocationContext } = require('../../Context/Location');
         longitudeDelta: 0.0421,
     }
 
+    console.log("location , user",location,user);
 
     if ( !user || !location) {
         return (

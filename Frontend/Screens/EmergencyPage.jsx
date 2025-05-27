@@ -11,6 +11,8 @@ const { useNavigation } = require('@react-navigation/native');
   const [nearbyHelpers, setNearbyHelpers] = useState(0);
   const pulseAnim = new Animated.Value(1);
 
+  // const navigation = useNavigation();
+
   useEffect(() => {
     const backAction = () => {
       Alert.alert(
@@ -33,6 +35,10 @@ const { useNavigation } = require('@react-navigation/native');
       interval = setInterval(() => {
         setTimer((prev) => prev - 1);
       }, 1000);
+    }
+
+    if (timer === 0) {
+      navigation.navigate('EmergencyInfo');
     }
 
     return () => clearInterval(interval);
