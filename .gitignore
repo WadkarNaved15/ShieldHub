@@ -1,0 +1,105 @@
+# ============================
+# 🌍 UNIVERSAL .GITIGNORE
+# ============================
+
+# macOS
+.DS_Store
+
+# ============================
+# 🧠 BACKEND (Node.js)
+# ============================
+
+# Dependencies
+Backend/node_modules/
+Backend/package-lock.json
+
+# Logs
+Backend/logs/
+*.log
+
+# Env & Secrets
+Backend/.env
+Backend/*.env
+Backend/config/*.json
+Backend/config/*.env
+Backend/config/*.js
+Backend/hershield-*.json
+!Backend/config/.keep
+
+# Build / Cache
+Backend/dist/
+Backend/.cache/
+
+# ============================
+# 📱 FRONTEND (React Native)
+# ============================
+
+# Dependencies
+Frontend/node_modules/
+Frontend/package-lock.json
+
+# Android
+Frontend/android/.gradle/
+Frontend/android/.idea/
+Frontend/android/.cxx/
+Frontend/android/local.properties
+Frontend/android/gradle.properties
+Frontend/android/build/
+Frontend/android/app/build/
+Frontend/android/app/.cxx/
+Frontend/android/app/*.iml
+Frontend/android/*.iml
+Frontend/android/*.hprof
+Frontend/android/*.keystore
+!Frontend/android/debug.keystore
+
+# iOS / Xcode
+Frontend/ios/build/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+Frontend/ios/xcuserdata/
+*.xccheckout
+*.moved-aside
+DerivedData/
+*.hmap
+*.ipa
+*.xcuserstate
+**/.xcode.env.local
+
+# Metro & JS
+*.jsbundle
+.metro-health-check*
+
+# Env
+Frontend/.env
+Frontend/*.env
+
+# Yarn
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# Fastlane
+**/fastlane/report.xml
+**/fastlane/Preview.html
+**/fastlane/screenshots
+**/fastlane/test_output
+
+# Ruby / CocoaPods
+**/Pods/
+vendor/bundle/
+
+# Testing & Coverage
+coverage/
+
+# IDEs / Misc
+.vscode/
