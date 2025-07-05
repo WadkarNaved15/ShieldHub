@@ -17,7 +17,8 @@ const SignUp = () => {
     const [disabled, setDisabled] = useState(true);
     const [showOtpInput, setShowOtpInput] = useState(false);
     const [otpVerified, setOtpVerified] = useState(false);
-    const [viewPassword,setViewPassword]= useState(false)
+    const [viewPassword,setViewPassword]= useState(false);
+    const [role, setRole] = useState('');
 
     const handleSendOtp = async () => {
         if (phoneNumber === '') {
@@ -111,14 +112,22 @@ const SignUp = () => {
             Alert.alert('Error', 'Please fill all the fields and verify OTP');
             return;
         }
+
+
+        if ((role === 'hershield' || role === 'senior')) {
+  if ((gender === 'Male' && age < 18) || (gender === 'Female' && age < 15)) {
+    return res.status(400).json({ message: 'You are not eligible for this role based on your age and gender.' });
+  }
+}
+
     
-        if (gender === 'Male' && age < 18) {
-            Alert.alert('Error', 'You are not eligible for this service');
-            return;
-        } else if (gender === 'Female' && age < 15) {
-            Alert.alert('Error', 'You are not eligible for this service');
-            return;
-        }
+        // if (gender === 'Male' && age < 18) {
+        //     Alert.alert('Error', 'You are not eligible for this service');
+        //     return;
+        // } else if (gender === 'Female' && age < 15) {
+        //     Alert.alert('Error', 'You are not eligible for this service');
+        //     return;
+        // }
     
         try {
             const response = await axios.post(`${process.env.BACKEND_URI}/register`, {
@@ -127,6 +136,7 @@ const SignUp = () => {
                 password,
                 gender,
                 age,
+                role,
             });
     
             if (response.status === 200) {
@@ -229,7 +239,25 @@ const SignUp = () => {
                                 </TouchableOpacity>
                             </View>
                         </View>
+
+
+
                     </View>
+
+                        <Text style={styles.label}>Select Role:</Text>
+                    <View style={styles.roleButtons}>
+  {['kid', 'parent', 'hershield', 'senior'].map((item) => (
+    <TouchableOpacity
+      key={item}
+      style={[styles.roleButton, role === item && styles.selectedRole]}
+      onPress={() => setRole(item)}
+    >
+      <Text style={role === item ? styles.selectedRoleText : styles.roleText}>
+        {item.charAt(0).toUpperCase() + item.slice(1)}
+      </Text>
+    </TouchableOpacity>
+  ))}
+</View>
 
                     <TouchableOpacity  style={styles.button} onPress={handleSignup} activeOpacity={0.8}>
                         <Text style={styles.buttonText}>Sign Up</Text>
@@ -346,6 +374,28 @@ const styles = StyleSheet.create({
         color: '#1B3A4B',
         fontSize: 16,
     },
+    roleButtons: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  marginVertical: 10,
+},
+roleButton: {
+  backgroundColor: '#E5E7EB',
+  padding: 10,
+  borderRadius: 10,
+  marginHorizontal: 5,
+},
+selectedRole: {
+  backgroundColor: '#A78BFA',
+},
+roleText: {
+  color: '#1F2937',
+},
+selectedRoleText: {
+  color: '#fff',
+  fontWeight: 'bold',
+},
+
     register: {
         color: '#1B3A4B',
         fontSize: 16,

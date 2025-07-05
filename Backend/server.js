@@ -26,6 +26,8 @@ const {getIO, initializeSocket} = require('./utils/socket');
 
 require('dotenv').config(); // To load environment variables from a .env file
 
+const parentRoutes = require('./routes/parent');
+
 const app = express();
 const server = http.createServer(app);
 
@@ -53,6 +55,11 @@ app.use('/achievements', AchievementsRouter);
 app.use('/sos',SosRouter)
 app.use('/users', UsersRouter);
 app.use('/FeelingUnsafe', FeelingUnsafeRouter);
+
+app.use('/kid', require('./routes/kid'));
+app.use('/parent', parentRoutes);
+
+
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI,{
@@ -213,10 +220,10 @@ app.post('/verify-otp', async (req, res) => {
 
   // register of new user
   app.post('/register', async (req, res) => {
-    const { fullName, phoneNumber, password, gender, age } = req.body;
+    const { fullName, phoneNumber, password, gender, age , role } = req.body;
 
     // Validate input
-    if (!fullName || !phoneNumber || !password || !gender || !age) {
+    if (!fullName || !phoneNumber || !password || !gender || !age || !role) {
         return res.status(400).json({ message: 'All fields are required' });
     }
 
@@ -238,6 +245,7 @@ app.post('/verify-otp', async (req, res) => {
             password: hashedPassword, // Store the hashed password
             gender,
             age,
+            role,
         });
 
         await newUser.save();
@@ -462,4 +470,11 @@ app.post('/login', async (req, res) => {
 // Start the server
 server.listen(PORT,"0.0.0.0", () => {
   console.log(`Server is running on port ${PORT}`);
+});
+
+
+// Optional: 404 handler for better debugging
+app.use((req, res) => {
+  console.error(`❌ Unknown Route: ${req.method} ${req.originalUrl}`);
+  res.status(404).json({ error: 'Route not found' });
 });

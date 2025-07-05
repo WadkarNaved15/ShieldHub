@@ -46,7 +46,9 @@ const modules = [
     tagline: 'Safety That Grows With Them',
     color: ['#FB923C', '#EA580C'],
     active: true,
-    navigateTo: 'KidSafeHome',
+    // navigateTo: 'KidSafeHome',
+    navigateTo: 'KidSectionLanding',
+
   },
   // {
   //   id: 'travelmode',

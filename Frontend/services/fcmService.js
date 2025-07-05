@@ -27,6 +27,7 @@ const FCMService = {
         }
     },
 
+
     async getFCMToken() {
         try {
             const newToken = await messaging().getToken();
@@ -38,7 +39,9 @@ const FCMService = {
             if (!storedToken || storedToken !== newToken) {
                 console.log("🔄 Updating FCM Token...");
                 await saveToken('fcmToken', newToken);
-                await apiCall({ url: `${BACKEND_URI}/users/fcm-token`, method: 'PUT', data: { fcm_token: newToken } });
+                // await apiCall({ url: `${BACKEND_URI}/users/fcm-token`, method: 'PUT', data: { fcm_token: newToken } });
+                await apiCall({ url: '/users/fcm-token', method: 'PUT', data: { fcm_token: newToken } });
+
             } else {
                 console.log("FCM Token unchanged, no update needed.");
             }
@@ -88,7 +91,9 @@ const FCMService = {
             await saveToken('fcmToken', token);
 
             // Send updated token to backend
-            await apiCall({ url: `${BACKEND_URI}/users/fcm-token`, method: 'PUT', data: { fcm_token: token } });
+            // await apiCall({ url: `${BACKEND_URI}/users/fcm-token`, method: 'PUT', data: { fcm_token: token } });
+                await apiCall({ url: '/users/fcm-token', method: 'PUT', data: { fcm_token: token } });
+
         });
     }
 };

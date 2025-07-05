@@ -78,6 +78,7 @@ android {
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
+    
 
     namespace "com.hershield"
     def googleMapsApiKey = project.hasProperty("GOOGLE_MAPS_API_KEY") ? project.GOOGLE_MAPS_API_KEY : ""
@@ -119,6 +120,7 @@ dependencies {
     implementation("com.facebook.react:react-android")
     implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
     if (hermesEnabled.toBoolean()) {
+    // if (project.ext.react.get("hermesEnabled").toBoolean()) {
         implementation("com.facebook.react:hermes-android")
     } else {
         implementation jscFlavor

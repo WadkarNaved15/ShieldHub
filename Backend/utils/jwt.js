@@ -6,15 +6,20 @@ const Users = require('../model/Users');
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
 
+console.log("🔑 Access Token Secret:", ACCESS_TOKEN_SECRET);
+console.log("🔑 Refresh Token Secret:", REFRESH_TOKEN_SECRET);
+
+
 // Function to generate access and refresh tokens
 function generateAccessToken(userData) {
-    const { _id, fullName, phoneNumber, age, gender, aadharNumber } = userData;
+    const { _id, fullName, phoneNumber, age, gender, aadharNumber , role } = userData;
 const plainUserData = {
     _id: _id.toString(), // Convert ObjectId to string
     fullName,
     phoneNumber,
     age,
     gender,
+    role,
     aadharNumber,
 };
 return jwt.sign(plainUserData, ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
@@ -25,23 +30,25 @@ return jwt.sign(plainUserData, ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
   }
   
   // Verify access token
-  function verifyAccessToken(token) {
-    try {
-      return jwt.verify(token, ACCESS_TOKEN_SECRET);
-    } catch (error) {
-      throw new Error('Invalid access token');
-    }
+ function verifyAccessToken(token) {
+  try {
+    return jwt.verify(token, ACCESS_TOKEN_SECRET);
+  } catch (error) {
+    console.error("❌ JWT Verification Error:", error.message);
+    throw new Error('Invalid access token');
   }
+}
 
 
-  function refreshAccessToken(refreshToken) {
+
+ async function refreshAccessToken(refreshToken) {
     try {
       if (!refreshToken) {
         throw new Error('Refresh token not found');
       }
 
       const decoded = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET);
-      const user = Users.findOne({ phoneNumber: decoded.phoneNumber });
+      const user = await Users.findOne({ phoneNumber: decoded.phoneNumber });
       if (!user) {
         throw new Error('User not found');
       }

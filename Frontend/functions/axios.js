@@ -4,6 +4,7 @@ const { getToken, saveToken } = require('./secureStorage');
 // Create an Axios instance for API requests
 const axiosInstance = axios.create({
   baseURL: process.env.BACKEND_URI, 
+  // baseURL: 'http://192.168.32.234:3000',
   timeout: 10000, 
 });
 
@@ -39,6 +40,8 @@ const apiCall = async ({ url, method = 'GET', headers = {}, data = {} }) => {
     console.log("Backend URL:", process.env.BACKEND_URI);
 
     const accessToken = await getToken('accessToken');
+    // console.log("🔐 Sending access token:", accessToken);
+
     const authHeaders = accessToken
       ? { ...headers, Authorization: `Bearer ${accessToken}` }
       : headers;
@@ -50,7 +53,7 @@ const apiCall = async ({ url, method = 'GET', headers = {}, data = {} }) => {
     const response = await axiosInstance({ url, method, headers: authHeaders, data });
 
     console.log("✅ API Response:", response.data);
-    return response;
+    return response.data;
   } catch (error) {
     console.log("Error:", error);
 
@@ -71,7 +74,9 @@ const apiCall = async ({ url, method = 'GET', headers = {}, data = {} }) => {
     }
 
     console.error('API call failed:', error);
-    return null; // Return null instead of throwing an error
+    // return null; // Return null instead of throwing an error
+    throw error; // ✅ Let the caller handle the error
+
   }
 };
 

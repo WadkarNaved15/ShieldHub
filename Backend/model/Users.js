@@ -32,6 +32,34 @@ const userSchema = new mongoose.Schema({
   //   minlength: 14,
   //   maxlength: 14
   // },
+
+
+  role: {
+  type: String,
+  enum: ['parent', 'kid', 'hershield', 'senior'],
+  required: true,
+  default: 'hershield' // or based on logic during signup
+},
+
+parentId: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'Users', // reference to parent user
+},
+
+kidIds: [{
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'Users', // reference to children
+}],
+
+kidCode: {
+  type: String,
+  unique: true,
+  sparse: true,
+},
+
+
+
+
   profileImage: {
     type: String,
   },
@@ -45,6 +73,34 @@ const userSchema = new mongoose.Schema({
         default: Date.now,
     },
   }],
+
+
+  // ✅ New fields for Kid Tracking
+  mood: {
+    type: String,
+    default: "😊"
+  },
+
+  isEmergency: {
+    type: Boolean,
+    default: false
+  },
+
+  lastCheckIn: {
+    type: Date
+  },
+
+  currentLocation: {
+    type: {
+      type: String,
+      enum: ['Point'],
+      default: 'Point'
+    },
+    coordinates: {
+      type: [Number],
+      default: [0, 0]
+    }
+  },
   
 }, { timestamps: true });
 

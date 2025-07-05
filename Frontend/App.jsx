@@ -26,6 +26,12 @@ const FacialRecognition = require('./Screens/FacialRecognition');
 const Marketplace = require('./Screens/HerShield/Marketplace');
 const Modules = require('./Screens/Modules');
 const KidSafeHome = require('./Screens/KidSafe/Home');
+import KidModeScreen from './Screens/KidSafe/KidModeScreen';
+import KidSectionLanding from './Screens/KidSafe/KidSectionLanding';
+import ParentLink from './Screens/KidSafe/ParentLink';
+import ParentHome from './Screens/KidSafe/ParentHome'
+import Schedule from './Screens/KidSafe/Schedule';
+
 const EmergencyInfo = require('./Screens/HerShield/EmergencyInfo');
 
 const { FeelingUnsafeProvider } = require('./Context/FeelingUnsafe');
@@ -141,6 +147,14 @@ function AppContent() {
         <Stack.Screen name="Marketplace" component={Marketplace} />
         <Stack.Screen name="Modules" component={Modules} />
         <Stack.Screen name="KidSafeHome" component={KidSafeHome} />
+        <Stack.Screen name="KidSectionLanding" component={KidSectionLanding} />
+        <Stack.Screen name="ParentLink" component={ParentLink} />
+        <Stack.Screen name="KidModeScreen" component={KidModeScreen} />
+<Stack.Screen name="ParentHome" component={ParentHome} />
+<Stack.Screen name="Schedule" component={Schedule} />
+
+
+
       </Stack.Navigator>
     </NavigationContainer>
   );

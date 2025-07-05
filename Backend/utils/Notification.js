@@ -1,9 +1,12 @@
 const admin = require("firebase-admin");
-const serviceAccount = require("../hershield-47214-firebase-adminsdk-fbsvc-7fa16ff798.json");
+const serviceAccount = require("../config/hershield-firebase.json");
 
-admin.initializeApp({
+// ✅ Only initialize if not already initialized
+if (!admin.apps.length) {
+  admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
   });
+}
   
   const sendNotification = async (token, message) => {
     const payload = {
