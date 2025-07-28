@@ -177,8 +177,11 @@ const UserProvider = ({ children }) => {
     }
   };
 
+  
   // Logout function
   const logout = async () => {
+//     await messaging().deleteToken(); // 🧹 Delete token from FCM side
+// await deleteToken('fcmToken');    // 🧹 Clear local storage
     await deleteToken('accessToken');
     await deleteToken('refreshToken');
     setUser(null);

@@ -9,7 +9,9 @@ let shouldReconnect = false;
 const checkInTimers = new Map(); 
 
 const speechClient = new speech.SpeechClient({
-  keyFilename: './config/hershield-449410-ea0d1493a161.json', // Path to Google API key
+  // keyFilename: './config/hershield-449410-ea0d1493a161.json', // Path to Google API key
+  keyFilename: './config/hershield-firebase.json', // Path to Google API key
+
 });
 
 const EMERGENCY_PHRASES = ["help me", "please help", "emergency", "save me"];

@@ -35,7 +35,12 @@ return jwt.sign(plainUserData, ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
     return jwt.verify(token, ACCESS_TOKEN_SECRET);
   } catch (error) {
     console.error("❌ JWT Verification Error:", error.message);
-    throw new Error('Invalid access token');
+
+    // Return custom status to be caught by route logic
+    const err = new Error('Invalid or expired access token');
+    err.status = 403;
+    throw err;
+    // throw new Error('Invalid access token');
   }
 }
 

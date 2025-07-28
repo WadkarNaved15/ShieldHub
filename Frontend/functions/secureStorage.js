@@ -6,7 +6,8 @@ async function saveToken(key, value) {
     await Keychain.setGenericPassword(key, value, { service: key });
     console.log('Token saved successfully for:', key);
   } catch (error) {
-    console.error('Error saving token:', error);
+    console.error('Error saving token:', error.message, error);
+
   }
 }
 

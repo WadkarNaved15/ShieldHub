@@ -28,27 +28,70 @@ const FCMService = {
     },
 
 
-    async getFCMToken() {
-        try {
-            const newToken = await messaging().getToken();
-            const storedToken = await getToken('fcmToken');
+//     async getFCMToken() {
+//         try {
+//             const newToken = await messaging().getToken();
+//             const storedToken = await getToken('fcmToken');
     
-            console.log("New FCM Token:", newToken);
-            console.log("Stored FCM Token:", storedToken);
+//             console.log("New FCM Token:", newToken);
+//             console.log("Stored FCM Token:", storedToken);
     
-            if (!storedToken || storedToken !== newToken) {
-                console.log("🔄 Updating FCM Token...");
-                await saveToken('fcmToken', newToken);
-                // await apiCall({ url: `${BACKEND_URI}/users/fcm-token`, method: 'PUT', data: { fcm_token: newToken } });
-                await apiCall({ url: '/users/fcm-token', method: 'PUT', data: { fcm_token: newToken } });
+//             if (!storedToken || storedToken !== newToken) {
+//                 console.log("🔄 Updating FCM Token...");
+//                 await saveToken('fcmToken', newToken);
+//                 // await apiCall({ url: `${BACKEND_URI}/users/fcm-token`, method: 'PUT', data: { fcm_token: newToken } });
+//                 await apiCall({ url: '/users/fcm-token', method: 'PUT', data: { fcm_token: newToken } });
+// console.log("📥 Backend response for FCM save:", response);
+//             } else {
+//                 console.log("FCM Token unchanged, no update needed.");
+//             }
+//         } catch (error) {
+//             console.error("Error getting FCM token:", error);
+//         }
+//     },
 
-            } else {
-                console.log("FCM Token unchanged, no update needed.");
-            }
-        } catch (error) {
-            console.error("Error getting FCM token:", error);
-        }
-    },
+
+async getFCMToken() {
+  try {
+    const newToken = await messaging().getToken();
+    const storedToken = await getToken('fcmToken');
+
+    console.log("New FCM Token:", newToken);
+    console.log("Stored FCM Token:", storedToken);
+
+    await saveToken('fcmToken', newToken); // save locally anyway
+
+    console.log("🔄 Sending FCM token to backend...");
+    const response = await apiCall({
+      url: '/users/fcm-token',
+      method: 'PUT',
+      data: { fcm_token: newToken },
+    });
+    console.log("📥 Backend response:", response);
+  } catch (error) {
+    console.error("Error syncing FCM token:", error);
+  }
+},
+
+
+
+// async getFCMToken() {
+//   try {
+//     // Force generate a new token on login
+//     await messaging().deleteToken(); // 💥 This clears any previous token
+    
+//     const freshToken = await messaging().getToken(); // 🆕 New token for this user
+//     console.log("🎯 Fresh FCM Token:", freshToken);
+    
+//     await saveToken('fcmToken', freshToken); // secure local storage
+
+//     // Send to backend with current JWT in header
+//     await apiCall({ url: '/users/fcm-token', method: 'PUT', data: { fcm_token: freshToken } });
+
+//   } catch (error) {
+//     console.error("❌ Error getting FCM token:", error);
+//   }
+// },
 
     async getStoredToken() {
         try {

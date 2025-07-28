@@ -48,26 +48,33 @@ router.post('/startFeelingUnsafe', async (req, res) => {
 router.post('/updateFeelingUnsafe', async (req, res) => {
   try {
     const { interval } = req.body;
+    console.log("Incoming interval:", interval);
+
     const decoded = getUserFromToken(req);
+    console.log("Decoded user from token:", decoded);
 
     const session = await FeelingUnsafe.findOne({ user_id: decoded._id });
+    console.log("Fetched session:", session);
+
     if (!session) return res.status(404).json({ error: 'Session not found' });
 
     session.interval = interval;
     session.lastCheckIn = new Date();
     await session.save();
+    console.log("Session updated and saved.");
 
-    // ✅ Pass session as a plain object
-    if(session.active) {
-          await startNewSession(session.toObject());
-        }
+    if (session.active) {
+      console.log("Session is active, restarting session...");
+      await startNewSession(session.toObject()); // 🔍 Might be the failing point
+    }
 
     res.status(200).json({ message: 'Interval updated successfully and check-in rescheduled.' });
   } catch (error) {
-    console.error('Error updating interval:', error);
+    console.error('❌ Error updating interval:', error);
     res.status(error.status || 500).json({ error: error.message || 'Failed to update interval.' });
   }
 });
+
 
 
 // ✅ Stop Feeling Unsafe Mode
