@@ -186,4 +186,4 @@ blockedText: {
   },
 });
 
-export default ParentLink;
+export default Link;
