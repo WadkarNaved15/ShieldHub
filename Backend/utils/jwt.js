@@ -21,7 +21,7 @@ function generateAccessToken(userData) {
     aadharNumber,
   };
 
-  return jwt.sign(payload, ACCESS_TOKEN_SECRET, { expiresIn: '5s' }); // change to '5s' only for testing
+  return jwt.sign(payload, ACCESS_TOKEN_SECRET, { expiresIn: '1d' }); 
 }
 
 // 2. Generate refresh token
