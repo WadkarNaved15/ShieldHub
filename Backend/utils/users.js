@@ -1,4 +1,4 @@
-const client = require("./Redis")
+const client = require("./Redis");
 
 async function setFcmToken(userId, token) {
     try {
@@ -9,7 +9,7 @@ async function setFcmToken(userId, token) {
         return false;
     }
 }
-
+    
 async function getFcmToken(userId) {
     try {
         const token = await client.hget("fcm_tokens", userId);

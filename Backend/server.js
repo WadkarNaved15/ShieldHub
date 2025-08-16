@@ -10,6 +10,8 @@ const Twilio = require('twilio');
 const {parsePhoneNumberFromString} = require('libphonenumber-js');
 const http = require("http");
 const { processAudio, stopRecognitionStream } = require("./Functions/FeelingUnsafe");
+const auth = require('./middleware/auth'); // Optional if using middleware version
+
 
 
 
@@ -435,38 +437,45 @@ app.post('/login', async (req, res) => {
       }
   
       const newAccessToken = generateAccessToken(user);
-      const newRefreshToken = generateRefreshToken(user);
+      const newRefreshToken = generateRefreshToken(user.phoneNumber);
   
       res.status(200).json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
   });
 
-  app.put('/update-location', async (req, res) => {
-    const { latitude, longitude } = req.body;
-    const token = req.headers.authorization;
-    
-    if (token && token.startsWith('Bearer ')) {
-      const extractedToken = token.split(' ')[1]; // Extract the token part after "Bearer "
-      const decoded = verifyAccessToken(extractedToken);
-      const user = await Users.findByIdAndUpdate(
-        decoded._id,
-        {
-            current_location: {
-                type: 'Point',
-                coordinates: [longitude, latitude],
-            },
+app.put('/update-location', async (req, res) => {
+  const { latitude, longitude } = req.body;
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ message: 'No token provided' });
+  }
+
+  const token = authHeader.split(' ')[1];
+
+  try {
+    const decoded = verifyAccessToken(token); // This may throw
+    const user = await Users.findByIdAndUpdate(
+      decoded._id,
+      {
+        current_location: {
+          type: 'Point',
+          coordinates: [longitude, latitude],
         },
-        { new: true } // Return the updated document
+      },
+      { new: true }
     );
 
     if (!user) {
-        return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: 'User not found' });
     }
 
-    res.status(200).json({ message: 'Location updated successfully', user });
-  } else {
-    res.status(401).json({ message: 'Unauthorized' });
+    return res.status(200).json({ message: 'Location updated successfully', user });
+
+  } catch (error) {
+    console.error("❌ Token or update error:", error.message);
+    return res.status(401).json({ message: 'Invalid or expired token' });
   }
-  });
+});
 // Start the server
 server.listen(PORT,"0.0.0.0", () => {
   console.log(`Server is running on port ${PORT}`);

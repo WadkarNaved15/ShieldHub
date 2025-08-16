@@ -2,59 +2,66 @@ const React = require('react');
 const { useEffect, useContext } = React;
 const { View, Text, StyleSheet, Image, ActivityIndicator } = require('react-native');
 const { UserContext } = require('../Context/User');
-const {getToken} = require('../functions/secureStorage');
+const { getToken } = require('../functions/secureStorage');
 
 const LogoScreen = ({ navigation }) => {
-    const { isAuthenticated, loading } = useContext(UserContext);
+  const { isAuthenticated, loading, loadUser } = useContext(UserContext);
 
-    useEffect(() => {
-        const checkModule = async () => {
-          if (!loading) {
-            if (isAuthenticated) {
-              const module = await getToken('module');
-              if (module) {
-                navigation.replace(module);
-              }else{
-                navigation.replace('Modules');
-              }
-            } else {
-              navigation.replace('Login');
-            }
+  useEffect(() => {
+    const init = async () => {
+      await loadUser(); // 🔄 Always attempt to load user from context
+    };
+
+    init();
+  }, []);
+
+  useEffect(() => {
+    const navigateAfterAuthCheck = async () => {
+      if (!loading) {
+        if (isAuthenticated) {
+          const module = await getToken('module');
+          if (module) {
+            navigation.replace(module); // 🚀 Navigate to saved module
+          } else {
+            navigation.replace('Modules'); // 🧭 Default module
           }
-        };
-      
-        checkModule();
-      }, [loading, isAuthenticated, navigation]);
+        } else {
+          navigation.replace('Login'); // 🔐 Not authenticated
+        }
+      }
+    };
 
-    return (
-        <View style={styles.splashContainer}>
-            <Image source={require('../assets/HerShield.jpeg')} style={styles.logo} />
-            <Text style={styles.splashText}>Welcome to HerShield</Text>
+    navigateAfterAuthCheck();
+  }, [loading, isAuthenticated]);
 
-            {/* ✅ Show loading indicator while checking authentication */}
-            {loading && <ActivityIndicator size="large" color="#ffffff" />}
-        </View>
-    );
+  return (
+    <View style={styles.splashContainer}>
+      <Image source={require('../assets/HerShield.jpeg')} style={styles.logo} />
+      <Text style={styles.splashText}>Welcome to HerShield</Text>
+
+      {loading && <ActivityIndicator size="large" color="#ffffff" />}
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
-    splashContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#7157e4',
-    },
-    logo: {
-        width: 200,
-        height: 200,
-        borderRadius: 20,
-        marginBottom: 20,
-    },
-    splashText: {
-        color: 'white',
-        fontSize: 24,
-        fontWeight: 'bold',
-    },
+  splashContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#7157e4',
+  },
+  logo: {
+    width: 200,
+    height: 200,
+    borderRadius: 20,
+    marginBottom: 20,
+  },
+  splashText: {
+    color: 'white',
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
 });
 
 module.exports = LogoScreen;
