@@ -3,166 +3,106 @@ const { createContext, useState, useEffect } = require('react');
 const axios = require('axios').default;
 const { getToken, saveToken, deleteToken } = require('../functions/secureStorage');
 const { decodeToken } = require('../functions/token'); 
-var GetLocation = require('react-native-get-location').default;
-const RNAndroidLocationEnabler = require('react-native-android-location-enabler');
-const {apiCall} = require('../functions/axios');
-const { PermissionsAndroid ,Alert} = require('react-native');
-
+const { Alert} = require('react-native');
+const {navigate} = require('../services/navigationService');
 
 const UserContext = createContext();
 
 const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [location, setLocation] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true); 
-  const [retryCount, setRetryCount] = useState(0);
-  const maxRetryCount = 3;
 
 
-  async function checkAndRequestLocationPermission() {
-    try {
-      const isGPSEnabled = await RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
-        interval: 10000,
-        fastInterval: 5000,
-      });
-  
-      if (!isGPSEnabled) {
-        Alert.alert("⚠ GPS Required", "Please enable GPS to continue.");
-        return;
+  // ✅ Load User
+const loadUser = async () => {
+  try {
+    setLoading(true);
+
+    const accessToken = await getToken('accessToken');
+    const refreshToken = await getToken('refreshToken');
+
+    console.log("Refresh Token:", refreshToken);
+
+    const isTokenExpired = (token) => {
+      try {
+        const decoded = decodeToken(token);
+        if (!decoded || !decoded.exp) return true;
+        const currentTime = Date.now() / 1000;
+        return decoded.exp < currentTime;
+      } catch (err) {
+        return true;
       }
-  
-      const granted = await PermissionsAndroid.requestMultiple([
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
-        PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION, // Required for background access
-      ]);
-  
-      if (
-        granted["android.permission.ACCESS_FINE_LOCATION"] === "granted" &&
-        granted["android.permission.ACCESS_COARSE_LOCATION"] === "granted"
-      ) {
-        fetchLocation(); // Automatically fetch location after permission is granted
-      } else {
-        Alert.alert("⚠ Location Permission Denied", "Enable it in settings.", [
-          { text: "Open Settings", onPress: () => Linking.openSettings() },
-          { text: "Cancel", style: "cancel" },
-        ]);
-      }
-    } catch (error) {
-      console.error("❌ Permission Error:", error);
-      Alert.alert("Error", "Something went wrong while requesting permissions.");
-    }
-  }
-  
-  async function fetchLocation() {
-    try {
-      const location = await GetLocation.getCurrentPosition({
-        enableHighAccuracy: true,
-        timeout: 15000,
-      });
-  
-      console.log("📍 Location:", location);
-      setLocation(location); 
-      await updateRedisLocation();
-    } catch (error) {
-      console.error("❌ Error fetching location:", error);
-  
-      if (error.code === "CANCELLED") {
-        Alert.alert("⚠ Location Error", "Location request was cancelled.");
-        return;
-      }
-  
-      if (error.code === "UNAVAILABLE") {
-        Alert.alert(
-          "⚠ GPS is Off",
-          "Please turn on GPS to get your location.",
-          [
-            { text: "Turn On GPS", onPress: checkAndRequestLocationPermission },
-            { text: "Cancel", style: "cancel" },
-          ]
-        );
-        return;
-      }
-  
-      if (retryCount < maxRetryCount) {
-        setRetryCount(prev => prev + 1);
-        setTimeout(fetchLocation, 2000);
-      }else {
-        Alert.alert("⚠ Location Error", "Max retries reached. Please check GPS and try again.");
-      }
-    }
-  }
+    };
 
-
-  async function updateRedisLocation() {
-    if(!location) return;
-    try {
-      apiCall({
-        method: "PUT",
-        url: "/location/update-location",
-        data: { latitude: location.latitude, longitude: location.longitude },
-      });
-    } catch (error) {
-      console.error("Error updating Redis location:", error);
-    }
-  }
-
-  const loadUser = async () => {
-    try {
-      setLoading(true); // Start loading state
-      const accessToken = await getToken('accessToken');
-      const refreshToken = await getToken('refreshToken');
-
-      if (accessToken) {
-        const decoded = decodeToken(accessToken);
-        if (decoded) {
-          setIsAuthenticated(true);
+    // ✅ Try access token
+    if (accessToken) {
+      try {
+        if (!isTokenExpired(accessToken)) {
+          const decoded = decodeToken(accessToken);
           setUser(decoded);
-          setLoading(false);
+          setIsAuthenticated(true);
           return;
+        } else {
+          console.log("Access token is expired, trying refresh token...");
         }
+      } catch (err) {
+        console.log("Access token decoding failed, trying refresh token...");
       }
-
-      // If access token is invalid, try refreshing
-      if (refreshToken) {
-        try {
-          const response = await axios.post(`${process.env.BACKEND_URI}/refresh-token`, { refreshToken });
-          const newAccessToken = response.data.accessToken;
-
-          if (newAccessToken) {
-            await saveToken('accessToken', newAccessToken);
-            const decoded = decodeToken(newAccessToken);
-            if (decoded) {
-              setUser(decoded);
-              setIsAuthenticated(true);
-            } else {
-              await logout(); // Invalid token → logout
-            }
-          }
-        } catch (error) {
-          console.error('Failed to refresh token:', error);
-          await logout();
-        }
-      } else {
-        await logout();
-      }
-    } catch (error) {
-      console.error('Error loading user:', error);
-      await logout();
-    } finally {
-      setLoading(false); // Stop loading
     }
+
+    // 🔁 Fallback to refresh token
+    if (refreshToken && !isTokenExpired(refreshToken)) {
+      try {
+        const response = await axios.post(`${process.env.BACKEND_URI}/refresh-token`, { refreshToken });
+        const newAccessToken = response.data.accessToken;
+        const newRefreshToken = response.data.refreshToken;
+
+        if (newAccessToken && newRefreshToken) {
+          await saveToken('accessToken', newAccessToken);
+          await saveToken('refreshToken', newRefreshToken);
+          const decoded = decodeToken(newAccessToken);
+          if (decoded) {
+            setUser(decoded);
+            setIsAuthenticated(true);
+            return;
+          }
+        } else {
+          throw new Error("Incomplete token response");
+        }
+      } catch (error) {
+        console.error("🔄 Token refresh failed:", error?.response?.data || error.message);
+        Alert.alert("Session expired", "Please log in again.");
+      }
+    } else {
+      console.log("Refresh token is invalid or expired.");
+    }
+
+    // ❌ If both failed
+    await logout();
+
+  } catch (error) {
+    console.error("🚫 Error loading user:", error);
+    await logout();
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+  // ✅ Logout
+  const logout = async () => {
+       navigate("Login")
+    await deleteToken('accessToken');
+    await deleteToken('refreshToken');
+    setUser(null);
+    setIsAuthenticated(false);
+    setLocation(null);
+    console.log("User logged out");
+ 
   };
 
-  // Load user from token storage on app start
-  useEffect(() => {
-    
-    loadUser();
-    checkAndRequestLocationPermission();
-  }, []);
-
-  // Login function
+  // ✅ Login Function
   const login = async (accessToken, refreshToken) => {
     try {
       await saveToken('accessToken', accessToken);
@@ -177,20 +117,20 @@ const UserProvider = ({ children }) => {
     }
   };
 
-  
-  // Logout function
-  const logout = async () => {
-//     await messaging().deleteToken(); // 🧹 Delete token from FCM side
-// await deleteToken('fcmToken');    // 🧹 Clear local storage
-    await deleteToken('accessToken');
-    await deleteToken('refreshToken');
-    setUser(null);
-    setIsAuthenticated(false);
-    setLocation(null);
-  };
+  // ✅ Initial Effect: Load user
+  useEffect(() => {
+    loadUser();
+  }, []);
 
   return (
-    <UserContext.Provider value={{ user, isAuthenticated, loading, login, logout ,location,setLocation}}>
+    <UserContext.Provider value={{
+      user,
+      isAuthenticated,
+      loading,
+      login,
+      logout,
+      loadUser,
+    }}>
       {children}
     </UserContext.Provider>
   );

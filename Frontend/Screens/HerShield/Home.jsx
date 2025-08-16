@@ -1,5 +1,5 @@
 const React = require('react');
-const { useState, useRef,useContext } = React;
+const { useState, useRef,useContext ,useEffect} = React;
 const { 
     StyleSheet, View, Image, TouchableOpacity, 
     Text, Animated, ActivityIndicator, Alert
@@ -17,7 +17,7 @@ const { LocationContext } = require('../../Context/Location');
   
  function Home({ navigation }) {
     const {logout,user} = useContext(UserContext);
-    const {location} = useContext(LocationContext);
+  const { location, hasPermission, fetchLocation, checkAndRequestLocationPermission, updateRedisLocation } = useContext(LocationContext);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isModalVisible, setModalVisible] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
@@ -28,10 +28,9 @@ const { LocationContext } = require('../../Context/Location');
     const defaultMaleImage = require('./../../assets/male.png');
     const defaultFemaleImage = require('./../../assets/female.png');
     
-  console.log("backend uri",process.env.BACKEND_URI);
     const slideAnim = useRef(new Animated.Value(Dimensions.get('window').width)).current; 
 
-    console.log("user",user)
+    const isFetchingRef = useRef(false);
   
     
     // Image Picker
@@ -107,6 +106,27 @@ const { LocationContext } = require('../../Context/Location');
 
 
 
+// 1. Ask for permission, then fetch location
+useEffect(() => {
+  if (!hasPermission) {
+    checkAndRequestLocationPermission();
+  } else if (!location && !isFetchingRef.current) {
+    isFetchingRef.current = true;
+    fetchLocation().finally(() => {
+      isFetchingRef.current = false;
+    });
+  }
+}, [hasPermission]);
+
+// 2. Update Redis if location changes externally
+useEffect(() => {
+  if (location) {
+    updateRedisLocation(location);
+  }
+}, [location]);
+
+
+
     const region = {
         latitude: location?.latitude,
         longitude: location?.longitude,
@@ -116,14 +136,25 @@ const { LocationContext } = require('../../Context/Location');
 
     console.log("location , user",location,user);
 
-    if ( !user || !location) {
-        return (
-            <View style={styles.loaderContainer}>
-                <ActivityIndicator size="large" color="#0000ff" />
-                <Text>Loading...</Text>
-            </View>
-        );
-      }
+if (!user) {
+  return (
+    <View style={styles.loaderContainer}>
+      <ActivityIndicator size="large" color="#0000ff" />
+      <Text>Loading user...</Text>
+    </View>
+  );
+}
+
+if (!location) {
+  return (
+    <View style={styles.loaderContainer}>
+      <Text>Fetching location...</Text>
+      <TouchableOpacity onPress={fetchLocation}>
+        <Text style={{ color: '#7157E4', marginTop: 10 }}>Retry</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
 
     return (    <View style={styles.container}>
         {/* Hamburger Icon */}

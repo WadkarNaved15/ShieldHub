@@ -3,11 +3,14 @@ const Keychain = require('react-native-keychain');
 // Save a token with a specific key
 async function saveToken(key, value) {
   try {
-    await Keychain.setGenericPassword(key, value, { service: key });
-    console.log('Token saved successfully for:', key);
-  } catch (error) {
-    console.error('Error saving token:', error.message, error);
+    if (typeof value !== 'string' || !value.trim()) {
+      throw new Error(`❌ Invalid value for token "${key}": ${value}`);
+    }
 
+    await Keychain.setGenericPassword(key, value, { service: key });
+    console.log('✅ Token saved successfully for:', key);
+  } catch (error) {
+    console.error('🚫 Error saving token:', error.message, error);
   }
 }
 

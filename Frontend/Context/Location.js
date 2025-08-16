@@ -14,17 +14,6 @@ const LocationProvider = ({children}) => {
   const [retryCount, setRetryCount] = useState(0);
   const maxRetryCount = 3;
 
-  useEffect(() => {
-    checkAndRequestLocationPermission();
-  }, []);
-
-
-  // Step 4: Force fetch location when permission granted and location is null
-  useEffect(() => {
-    if (hasPermission && location === null) {
-      fetchLocation();
-    }
-  }, [hasPermission]);
 
 
   async function checkAndRequestLocationPermission() {
@@ -131,7 +120,7 @@ const LocationProvider = ({children}) => {
   }
 
   return (
-    <LocationContext.Provider value={{location, hasPermission}}>
+    <LocationContext.Provider value={{location, hasPermission, fetchLocation, checkAndRequestLocationPermission,updateRedisLocation}}>
       {children}
     </LocationContext.Provider>
   );

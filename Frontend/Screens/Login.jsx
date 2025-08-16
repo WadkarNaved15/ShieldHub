@@ -7,6 +7,7 @@ const { saveToken,getToken } = require('../functions/secureStorage');
 const FCMService = require('../services/fcmService');
 const { UserContext } = require('../Context/User');
 
+console.log("Frontend", process.env.BACKEND_URI); // Ensure this is set correctly in your environment
 
 console.log("backend", process.env.BACKEND_URI)
 const Login = () => {
@@ -24,7 +25,6 @@ const Login = () => {
                 phoneNumber,
                 password,
             });
-            console.log("response",response.data)
             if (response.status === 200) {
                 await login(response.data.accessToken, response.data.refreshToken);
                 await FCMService.getFCMToken();
