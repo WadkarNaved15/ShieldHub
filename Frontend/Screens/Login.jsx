@@ -1,6 +1,6 @@
 const React = require('react');
 const { useState,useContext } = React;
-const { View, StyleSheet, Text, TextInput, TouchableOpacity, Alert } = require('react-native');
+const { View, StyleSheet, Text, TextInput, KeyboardAvoidingView, TouchableOpacity, Alert } = require('react-native');
 const { useNavigation } = require('@react-navigation/native');
 const axios = require("axios").default;  // Fix for CommonJS require
 const { saveToken,getToken } = require('../functions/secureStorage');
@@ -45,6 +45,10 @@ const Login = () => {
     };
 
     return (
+        <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
         <View style={styles.container}>
             <View style={styles.bottomContainer}>
                 <Text style={styles.LogInText}>Log In</Text>
@@ -85,6 +89,7 @@ const Login = () => {
                 Don't have an account? <Text style={styles.boldText}>Register</Text>
             </Text>
         </View>
+        </KeyboardAvoidingView>
     );
 };
 

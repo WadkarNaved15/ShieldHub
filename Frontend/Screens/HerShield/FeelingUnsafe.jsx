@@ -19,6 +19,9 @@ const apiCall = require("../../functions/axios");
 const AudioRecord = require("react-native-audio-record").default;
 const { startBackgroundService, stopBackgroundService, getSocket } = require("../../services/socketServices");
 const {DeviceEventEmitter} = require("react-native")
+const Loader = require("../../Components/Loader");
+
+console.log("loader", Loader);
 
 const FeelingUnsafe = () => {
   const [isActive, setIsActive] = useState(false);
@@ -28,6 +31,7 @@ const FeelingUnsafe = () => {
   const [pinStaus, setPinStatus] = useState(null);
   const pulseAnim = new Animated.Value(1);
   const navigation = useNavigation();
+  const [loading, setLoading] = useState(false);
   let audioListener = null;
 
 
@@ -51,20 +55,27 @@ const FeelingUnsafe = () => {
     return 1; // Default to MIC
   }
 
-  useEffect(() => {
-    // Fetch status on component mount
-    apiCall({
-      method: "GET",
-      url: "/FeelingUnsafe",
+useEffect(() => {
+  setLoading(true);
+
+  apiCall({
+    method: "GET",
+    url: "/FeelingUnsafe",
+  })
+    .then((response) => {
+      console.log("Feeling Unsafe Status Response:", response);
+      setIsActive(response?.session?.active);
+      setTimer((response?.session?.interval || 0) * 60);
+      setSelectedInterval(response?.session?.interval?.toString() || "5"); // fallback
     })
-      .then((response) => {
-        console.log("Feeling Unsafe Status Response:", response);
-        setIsActive(response?.session.active);
-        setTimer(response?.session.interval * 60);
-        setSelectedInterval(response?.session.interval.toString());
-      })
-      .catch((error) => console.error("Failed to check Feeling Unsafe status:", error));
-  }, []);
+    .catch((error) => {
+      console.error("Failed to check Feeling Unsafe status:", error);
+    })
+    .finally(() => {
+      setLoading(false); // ✅ ensures loader stops only after response/error
+    });
+}, []);
+
 
 
   const startRecording = async () => {
@@ -271,6 +282,10 @@ useEffect(() => {
   const stopPulseAnimation = () => {
     pulseAnim.setValue(1);
   };
+
+  if(loading) {
+    return <Loader />;
+  }
 
   return (
     <View style={styles.container}>
