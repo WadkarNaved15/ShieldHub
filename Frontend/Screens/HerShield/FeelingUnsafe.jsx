@@ -58,9 +58,10 @@ const FeelingUnsafe = () => {
       url: "/FeelingUnsafe",
     })
       .then((response) => {
-        setIsActive(response.data?.session.active);
-        setTimer(response.data?.session.interval * 60);
-        setSelectedInterval(response.data?.session.interval.toString());
+        console.log("Feeling Unsafe Status Response:", response);
+        setIsActive(response?.session.active);
+        setTimer(response?.session.interval * 60);
+        setSelectedInterval(response?.session.interval.toString());
       })
       .catch((error) => console.error("Failed to check Feeling Unsafe status:", error));
   }, []);
@@ -120,19 +121,35 @@ const FeelingUnsafe = () => {
   };
   const isFirstRender = React.useRef(true); // Track initial render
 
-useEffect(() => {
-  if (isFirstRender.current) {
-    isFirstRender.current = false; // Mark as initialized
-    return; // 🚀 Skip the first execution
-  }
+// useEffect(() => {
+//   if (isFirstRender.current) {
+//     console.log("🔄 Skipping first render effect");
+//     isFirstRender.current = false; // Mark as initialized
+//     return; // 🚀 Skip the first execution
+//   }
 
-  apiCall({
-    method: "POST",
-    url: "/FeelingUnsafe/updateFeelingUnsafe",
-    data: { interval: parseInt(selectedInterval) },
-  }).catch((error) => console.error("❌ Failed to update interval:", error));
-  setTimer(parseInt(selectedInterval) * 60);
-}, [selectedInterval]);
+//   apiCall({
+//     method: "POST",
+//     url: "/FeelingUnsafe/updateFeelingUnsafe",
+//     data: { interval: parseInt(selectedInterval) },
+//   }).catch((error) => console.error("❌ Failed to update interval:", error));
+//   setTimer(parseInt(selectedInterval) * 60);
+// }, [selectedInterval]);
+
+const updateInterval = async (interval) => {
+  try {
+    await apiCall({
+      method: "POST",
+      url: "/FeelingUnsafe/updateFeelingUnsafe",
+      data: { interval },
+    });
+    setSelectedInterval(interval);
+    setTimer(interval * 60);
+    console.log("✅ Interval updated:", interval);
+  } catch (error) {
+    console.error("❌ Failed to update interval:", error);
+  }
+};
 
 const stopFeelingUnsafe = async () => {
   Alert.alert(
@@ -179,6 +196,7 @@ const stopFeelingUnsafe = async () => {
 };
 
 
+console.log("Timer", timer, "Selected Interval", selectedInterval, "Is Active", isActive);
 
 useEffect(() => {
   let interval;
@@ -306,7 +324,7 @@ useEffect(() => {
               styles.intervalButton,
               selectedInterval === 1 ? styles.intervalButtonSelected : null
             ]}
-            onPress={() => setSelectedInterval(1)}
+            onPress={() => updateInterval(1)}
           >
             <Text style={selectedInterval === 1 ? styles.intervalButtonTextSelected : styles.intervalButtonText}>
               1 min
@@ -318,7 +336,7 @@ useEffect(() => {
               styles.intervalButton,
               selectedInterval === 3 ? styles.intervalButtonSelected : null
             ]}
-            onPress={() => setSelectedInterval(3)}
+            onPress={() => updateInterval(3)}
           >
             <Text style={selectedInterval === 3 ? styles.intervalButtonTextSelected : styles.intervalButtonText}>
               3 mins
@@ -331,7 +349,7 @@ useEffect(() => {
               styles.intervalButton,
               selectedInterval === 5 ? styles.intervalButtonSelected : null
             ]}
-            onPress={() => setSelectedInterval(5)}
+            onPress={() => updateInterval(5)}
           >
             <Text style={selectedInterval === 5 ? styles.intervalButtonTextSelected : styles.intervalButtonText}>
               5 mins
@@ -343,7 +361,7 @@ useEffect(() => {
               styles.intervalButton,
               selectedInterval === 10 ? styles.intervalButtonSelected : null
             ]}
-            onPress={() => setSelectedInterval(10)}
+            onPress={() => updateInterval(10)}
           >
             <Text style={selectedInterval === 10 ? styles.intervalButtonTextSelected : styles.intervalButtonText}>
               10 mins
@@ -352,16 +370,43 @@ useEffect(() => {
         </View>
 
         <View style={styles.customTimeContainer}>
-          <TextInput
-            style={styles.customTimeInput}
-            placeholder="Custom time (e.g. 7:30)"
-            value={customTime}
-            onChangeText={setCustomTime}
-          />
-          <TouchableOpacity style={styles.confirmButton}>
-            <Text style={styles.confirmButtonText}>Confirm</Text>
-          </TouchableOpacity>
-        </View>
+  <TextInput
+    style={styles.customTimeInput}
+    placeholder="Custom time (e.g. 7:30)"
+    value={customTime}
+    onChangeText={setCustomTime}
+    keyboardType="numeric"
+  />
+<TouchableOpacity 
+  style={styles.confirmButton}
+  onPress={() => {
+    if (!customTime) return;
+
+    let totalMinutes = 0;
+    const parts = customTime.split(":").map(Number);
+
+    if (parts.length === 2) {
+      const [mins, secs] = parts;
+      if (!isNaN(mins) && !isNaN(secs)) {
+        totalMinutes = mins + secs / 60;
+      } else if (isNaN(mins) && !isNaN(secs)) {
+        // Case: ":45" (seconds only)
+        totalMinutes = secs / 60;
+      }
+    } else if (parts.length === 1 && !isNaN(parts[0])) {
+      // Case: "7" (minutes only)
+      totalMinutes = parts[0];
+    }
+
+    const interval = Math.max(1, Math.round(totalMinutes)); // at least 1 minute
+    updateInterval(interval);
+    setCustomTime(""); // clear after confirming
+  }}
+>
+  <Text style={styles.confirmButtonText}>Confirm</Text>
+</TouchableOpacity>
+</View>
+
 
         <View style={styles.controlButtonsRow}>
           <TouchableOpacity
