@@ -188,23 +188,7 @@ const refreshLogs = async () => {
     setEmergencyMode(newStatus);
 
     try {
-      // ✅ Step 1: Update location first
-      if (location && newStatus === true) {
-        const locationResponse = await apiCall({
-          method: 'PUT',
-          url: '/location/update-location',
-          data: {
-            latitude: location.latitude,
-            longitude: location.longitude,
-          },
-        });
-
-        // Log the response to ensure the location was updated successfully
-        console.log('📍 Location update response:', locationResponse);
-        // console.log("📍 Location updated before emergency");
-      }
-
-      // ✅ Step 2: Call emergency endpoint
+       //  Just send the current location and status to emergency route
       const response = await apiCall({
         method: 'PUT',
         url: '/kid/emergency-with-location',
@@ -579,12 +563,21 @@ const refreshLogs = async () => {
           isActive={activeTab === 'journey'}
           onPress={() => setActiveTab('journey')}
         />
-        <NavigationButton
+        {/* <NavigationButton
           Icon={Bell}
-          label="Alerts"
-          isActive={activeTab === 'alerts'}
-          onPress={() => setActiveTab('alerts')}
-        />
+          label="Set GeoFence"
+          isActive={activeTab === 'geofence'}
+          onPress={() => setActiveTab('geofence')}
+        /> */}
+
+{/* 
+        <NavigationButton
+  Icon={Bell}
+  label="Set GeoFence"
+  isActive={false} // optional, unless you're tracking stack nav state
+  onPress={() => navigation.navigate('GeoFence')}
+/> */}
+
         <NavigationButton
           Icon={Users}
           label="Profile"

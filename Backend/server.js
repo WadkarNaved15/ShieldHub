@@ -29,6 +29,7 @@ const {getIO, initializeSocket} = require('./utils/socket');
 require('dotenv').config(); // To load environment variables from a .env file
 
 const parentRoutes = require('./routes/parent');
+const geofenceRoutes = require('./routes/geofence');
 
 const app = express();
 const server = http.createServer(app);
@@ -60,6 +61,7 @@ app.use('/FeelingUnsafe', FeelingUnsafeRouter);
 
 app.use('/kid', require('./routes/kid'));
 app.use('/parent', parentRoutes);
+app.use('/geofence', geofenceRoutes);
 
 
 
