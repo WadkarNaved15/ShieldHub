@@ -20,11 +20,13 @@ const AchievementsForm = require('./Screens/AchievementsForm');
 const EmergencyNotificationsScreen = require('./Screens/EmergencyNotifications');
 const FeelingUnsafe = require('./Screens/HerShield/FeelingUnsafe');
 const AchievementsScreen = require('./Screens/AchievementsScreen');
+const CrimeReportsScreen = require('./Screens/HerShield/Crime_Reports');
 // const HerShieldHeroesScreen = require('./Screens/HerShield/HerShieldHeroesScreen');
 // const HelperRoute = require('./Screens/HelperRoute'); 
 const Marketplace = require('./Screens/HerShield/Marketplace');
 const Modules = require('./Screens/Modules');
 const KidSafeHome = require('./Screens/KidSafe/Home');
+
 import KidModeScreen from './Screens/KidSafe/KidModeScreen';
 import KidSectionLanding from './Screens/KidSafe/KidSectionLanding';
 import ParentLink from './Screens/KidSafe/ParentLink';
@@ -133,6 +135,7 @@ function AppContent() {
         <Stack.Screen name="SignUp" component={SignUpScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="HerShieldHeroes" component={HerShieldHeroes} />
+        <Stack.Screen name="CrimeReports" component={CrimeReportsScreen} />
         {/* <Stack.Screen name="HerShieldHeroesScreen" component={HerShieldHeroesScreen} /> */}
         <Stack.Screen name="Achievements" component={Achievements} />
         <Stack.Screen name="AchievementsScreen" component={AchievementsScreen} />

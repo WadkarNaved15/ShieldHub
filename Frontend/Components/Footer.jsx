@@ -17,6 +17,7 @@ const imageMap = {
   Achievements: require('./../assets/trophy.png'),
   LogOut: require('./../assets/logout.png'),
   Marketplace: require('./../assets/Marketplace.png'),
+  CrimeReports:  require('./../assets/bell.png'),
 }
 const Footer = ({ page, display, latitude, longitude,user }) => {
   const navigation = useNavigation();
@@ -87,11 +88,17 @@ const Footer = ({ page, display, latitude, longitude,user }) => {
             <Image source={imageMap.bell} style={styles.iconImage} />
           </View>
         </TouchableOpacity> */}
-         <TouchableOpacity onPress={() => navigation.navigate('EmergencyNotifications')} style={styles.iconContainer}>
+         {/* <TouchableOpacity onPress={() => navigation.navigate('EmergencyNotifications')} style={styles.iconContainer}>
           <View style={[styles.circle, page === 'EmergencyNotifications' && styles.activeCircle]}>
             <Image source={imageMap.bell} style={styles.iconImage} />
           </View>
           <Text style={styles.iconText}>Notifications</Text>
+        </TouchableOpacity> */}
+        <TouchableOpacity onPress={() => navigation.navigate('CrimeReports')} style={styles.iconContainer}>
+          <View style={[styles.circle, page === 'CrimeReports' && styles.activeCircle]}>
+            <Image source={imageMap.CrimeReports} style={styles.iconImage} />
+          </View>
+          <Text style={styles.iconText}>Community Feed</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('Marketplace')} style={styles.iconContainer}>
           <View style={[styles.circle, page === 'Marketplace' && styles.activeCircle]}>
