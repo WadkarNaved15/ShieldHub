@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
+
 import {
   View,
   Text,
@@ -17,6 +19,8 @@ const Schedule = () => {
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
   const [currentDate, setCurrentDate] = useState('');
+  const navigation = useNavigation();
+
 
   useEffect(() => {
     (async () => {
@@ -80,9 +84,16 @@ const Schedule = () => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.topRow}>
-        <Text style={styles.dateHeader}>📅 {currentDate}</Text>
-      </View>
+    
+
+     <View style={styles.topRow}>
+  <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+    <Text style={styles.backText}>⬅ Back</Text>
+  </TouchableOpacity>
+  <Text style={styles.dateHeader}>📅 {currentDate}</Text>
+</View>
+
+
 
       <Text style={styles.heading}>📘 Create Kid's Schedule</Text>
 
@@ -196,6 +207,24 @@ const styles = StyleSheet.create({
     color: '#64748B',
     marginTop: 4,
   },
+ topRow: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: 10,
+},
+
+backButton: {
+  padding: 5,
+},
+
+backText: {
+  fontSize: 16,
+  color: '#2563EB',
+  fontWeight: '600',
+},
+
+
   kidScroll: {
     flexDirection: 'row',
     marginTop: 10,

@@ -32,6 +32,7 @@ import KidSectionLanding from './Screens/KidSafe/KidSectionLanding';
 import ParentLink from './Screens/KidSafe/ParentLink';
 import ParentHome from './Screens/KidSafe/ParentHome'
 import Schedule from './Screens/KidSafe/Schedule';
+import GeoFence from './Screens/KidSafe/GeoFence';
 
 const EmergencyInfo = require('./Screens/HerShield/EmergencyInfo');
 
@@ -153,6 +154,7 @@ function AppContent() {
         <Stack.Screen name="KidModeScreen" component={KidModeScreen} />
 <Stack.Screen name="ParentHome" component={ParentHome} />
 <Stack.Screen name="Schedule" component={Schedule} />
+<Stack.Screen name="GeoFence" component={GeoFence} />
 
 
 

@@ -148,15 +148,14 @@ const ParentHome = ({ route }) => {
           navigation.navigate('Schedule', { kidId: kid._id });
         }}
       />
-      <NavigationButton
-        Icon={Bell}
-        label="Activity"
-        isActive={activeTab === 'activity'}
-        onPress={() => {
-          setActiveTab('activity');
-          navigation.navigate('ParentActivityLog', { kidId: kid._id });
-        }}
-      />
+     
+             <NavigationButton
+       Icon={Bell}
+       label="Set GeoFence"
+       isActive={false} // optional, unless you're tracking stack nav state
+       onPress={() => navigation.navigate('GeoFence')}
+     />
+     
       <NavigationButton
         Icon={Users}
         label="Kid Info"
