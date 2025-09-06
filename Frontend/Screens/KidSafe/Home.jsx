@@ -105,32 +105,32 @@ const refreshLogs = async () => {
 
 
 
-  useEffect(() => {
-  const fetchSchedule = async () => {
-    try {
-      const res = await apiCall({ url: '/schedule/kid', method: 'GET' });
+//   useEffect(() => {
+//   const fetchSchedule = async () => {
+//     try {
+//       const res = await apiCall({ url: '/schedule/kid', method: 'GET' });
 
-      setClassList(res.schedule || []);
-    } catch (err) {
-      console.log("Failed to fetch schedule:", err);
-    }
-  };
-  fetchSchedule();
+//       setClassList(res.schedule || []);
+//     } catch (err) {
+//       console.log("Failed to fetch schedule:", err);
+//     }
+//   };
+//   fetchSchedule();
   
-}, []);
+// }, []);
 
-  const markClassDone = async (classId) => {
-  try {
-    const res = await apiCall({ url: '/kid/schedule/complete', method: 'PUT', data: { classId } });
-    Alert.alert('Success', res.message);
-    // Refresh schedule
-    const updated = await apiCall({ url: '/kid/schedule/kid', method: 'GET' });
-    setClassList(updated.schedule);
-     await refreshLogs();
-  } catch (err) {
-    Alert.alert('Error', err?.response?.data?.error || 'Try during class time');
-  }
-};
+//   const markClassDone = async (classId) => {
+//   try {
+//     const res = await apiCall({ url: '/kid/schedule/complete', method: 'PUT', data: { classId } });
+//     Alert.alert('Success', res.message);
+//     // Refresh schedule
+//     const updated = await apiCall({ url: '/kid/schedule/kid', method: 'GET' });
+//     setClassList(updated.schedule);
+//      await refreshLogs();
+//   } catch (err) {
+//     Alert.alert('Error', err?.response?.data?.error || 'Try during class time');
+//   }
+// };
 
 
   const updateMood = async mood => {
@@ -150,6 +150,7 @@ const refreshLogs = async () => {
     }
   };
 
+
   useEffect(() => {
     fetchParentInfo();
   }, []);
@@ -164,6 +165,7 @@ const refreshLogs = async () => {
 
   useEffect(() => {
     if (location) {
+      console.log("📍 Location fetched from device:", location);
       updateLocation(location);
     }
   }, [location]);
@@ -172,7 +174,7 @@ const refreshLogs = async () => {
     try {
       await apiCall({
         method: 'PUT',
-        url: '/location/update-location',
+        url: '/kid/update-location', 
         data: {
           latitude: loc.latitude,
           longitude: loc.longitude,
@@ -183,35 +185,35 @@ const refreshLogs = async () => {
     }
   };
 
-  const toggleEmergency = async () => {
-    const newStatus = !isEmergencyMode;
-    setEmergencyMode(newStatus);
+  // const toggleEmergency = async () => {
+  //   const newStatus = !isEmergencyMode;
+  //   setEmergencyMode(newStatus);
 
-    try {
-       //  Just send the current location and status to emergency route
-      const response = await apiCall({
-        method: 'PUT',
-        url: '/kid/emergency-with-location',
-        data: {
-          emergency: newStatus,
-          latitude: location.latitude,
-          longitude: location.longitude,
-        },
-      });
+  //   try {
+  //      //  Just send the current location and status to emergency route
+  //     const response = await apiCall({
+  //       method: 'PUT',
+  //       url: '/kid/emergency-with-location',
+  //       data: {
+  //         emergency: newStatus,
+  //         latitude: location.latitude,
+  //         longitude: location.longitude,
+  //       },
+  //     });
 
-      await refreshLogs(); // <-- Add this after emergency response
+  //     await refreshLogs(); // <-- Add this after emergency response
 
 
-      // console.log("🚨 Full emergency response:", response);
+  //     // console.log("🚨 Full emergency response:", response);
 
-      // ✅ Step 3: Show response
-      if (newStatus === true && response.location) {
-        // console.log("📍 Kid Location during emergency:", response.location);
-      }
-    } catch (err) {
-      console.log('Emergency update failed:', err);
-    }
-  };
+  //     // ✅ Step 3: Show response
+  //     if (newStatus === true && response.location) {
+  //       // console.log("📍 Kid Location during emergency:", response.location);
+  //     }
+  //   } catch (err) {
+  //     console.log('Emergency update failed:', err);
+  //   }
+  // };
 
   const region = {
     latitude: location?.latitude,
@@ -283,7 +285,7 @@ const refreshLogs = async () => {
     }
   };
 
-  if (!user || !location) {
+  if (!user) {
     return (
       <View
         style={{
@@ -292,7 +294,21 @@ const refreshLogs = async () => {
           alignItems: 'center',
         }}>
         <ActivityIndicator size="large" color="#0000ff" />
-        <Text>Loading...</Text>
+        <Text>No User Found...</Text>
+      </View>
+    );
+  }
+
+   if (!location) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text>No Location Found...</Text>
       </View>
     );
   }
@@ -326,7 +342,7 @@ const refreshLogs = async () => {
       <ScrollView style={{paddingHorizontal: 20, marginBottom: 20}}>
         <MapComponent location={location} user={user} />
 
-        <TouchableOpacity
+        {/* <TouchableOpacity
           // onPress={() => setEmergencyMode(!isEmergencyMode)}
           onPress={toggleEmergency}
           style={{
@@ -343,7 +359,7 @@ const refreshLogs = async () => {
             style={{color: isEmergencyMode ? '#FFF' : 'red', marginLeft: 5}}>
             Emergency {isEmergencyMode ? 'Off' : 'On'}
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         {/* Quick Actions */}
         <View

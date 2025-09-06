@@ -1,64 +1,82 @@
+
+
 const express = require('express');
-const User = require('../model/Users');
-const SOS = require('../model/Sos');
-const { getNearestUsers, getUserLocation } = require('../utils/Location');
-const { verifyAccessToken } = require('../utils/jwt');
-const {getFcmToken} = require('../utils/users');
-const {getUserFromToken} = require('../Functions/userToken');
-const {sendFCMNotification} = require('../Functions/firebaseMessaging');
-const client = require('../utils/Redis');
-
-
 const router = express.Router();
 
+const Users = require('../model/Users');
+const { getNearestUsers, getUserLocation } = require('../utils/Location');
+const { getUserFromToken } = require('../Functions/userToken');
+const { sendFCMNotification } = require('../Functions/firebaseMessaging');
+const { mongoose } = require('mongoose');
 
 router.post("/send-sos", async (req, res) => {
   try {
-    const { longitude, latitude } = req.body;
-    console.log("📍 Incoming SOS:", { latitude, longitude });
+    const { latitude, longitude } = req.body;
+    if (!latitude || !longitude) {
+      return res.status(400).json({ error: "Location required" });
+    }
 
+    // 1️⃣ Get victim from JWT
     const decoded = getUserFromToken(req);
-    console.log("🔓 Decoded Token:", decoded);
+    if (!decoded || !decoded._id) {
+  return res.status(401).json({ error: "Unauthorized: Invalid token" });
+}
+    const victimId = decoded._id;
 
-    const userId = decoded._id;
-    if (!userId) return res.status(400).json({ error: "User ID required" });
+    console.log("🚨 SOS triggered by:", victimId);
 
-    if (!longitude || !latitude) return res.status(400).json({ error: "No location provided" });
+    // 2️⃣ Get victim location (Redis or request body)
+    const location = { latitude, longitude };
 
-    const location = await getUserLocation(userId);
-    console.log("📍 User's stored location in Redis:", location);
+    // 3️⃣ Find nearby users (Redis GEO)
+    const nearby = await getNearestUsers(latitude, longitude);
+    // const nearbyUserIds = nearby
+    //   .map(u => u.userId)
+    //   .filter(id => id !== victimId);
 
-    const users = await getNearestUsers(location.latitude, location.longitude);
-    console.log("👥 Nearby users:", users);
+    const nearbyUserIds = nearby
+      .map(u => u.userId)
+      .filter(id => id !== victimId.toString()) // Compare as strings
+      .map(id => new mongoose.Types.ObjectId(id)); // Convert for MongoDB query
 
-    if (!users.length) {
+
+    if (!nearbyUserIds.length) {
       console.log("❌ No nearby users found");
-      return res.status(404).json({ message: "No nearby users found" });
+      return res.json({ success: true, message: "No nearby users" });
     }
 
-    const userIds = users.map(u => u.userId).filter(id => id !== userId);
-    console.log("🔍 User IDs to notify:", userIds);
+    // 4️⃣ Fetch FCM tokens from MongoDB
+    const users = await Users.find({
+      _id: { $in: nearbyUserIds },
+      fcmToken: { $ne: null }
+    });
 
-    // 🧠 FIX: Spread the array properly in hmget
-    const tokens = await client.hmget("fcm_tokens", ...userIds);
-    console.log("📨 FCM tokens:", tokens);
+    console.log(`👥 Found ${users.length} users in DB with tokens`);
 
-    const validTokens = tokens.filter(token => token);
-    if (!validTokens.length) {
-      console.log("❌ No valid FCM tokens found");
-      return res.status(404).json({ message: "No valid FCM tokens found" });
+    // const tokens = users.map(u => u.fcmToken);
+    const tokens = users.map(u => u.fcmToken).filter(t => !!t);
+
+    if (!tokens.length) {
+      console.log("❌ No FCM tokens available");
+      return res.json({ success: true, message: "No users with FCM token" });
     }
 
-    await sendFCMNotification(validTokens, userId, location);
-    console.log("✅ SOS sent successfully");
+    // 5️⃣ Send notification
+    await sendFCMNotification(tokens, victimId, location);
 
-    res.json({ success: true, message: "SOS sent", users });
+    console.log("✅ SOS notifications sent to nearby users");
+
+    // 6️⃣ Respond ONCE
+    res.json({
+      success: true,
+      // notifiedUsers: users.length
+      notifiedUsers: tokens.length
+    });
+
   } catch (error) {
-    console.error("❌ Error sending SOS:", error);
-    res.status(500).json({ error: "Internal server error" });
+    console.error("❌ SOS ERROR:", error);
+    res.status(500).json({ error: "SOS failed" });
   }
 });
-
-
 
 module.exports = router;

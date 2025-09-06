@@ -92,13 +92,13 @@ const loadUser = async () => {
 
   // ✅ Logout
   const logout = async () => {
-       navigate("Login")
     await deleteToken('accessToken');
     await deleteToken('refreshToken');
     setUser(null);
     setIsAuthenticated(false);
-    setLocation(null);
+    // setLocation(null);
     console.log("User logged out");
+    navigate("Login")
  
   };
 
