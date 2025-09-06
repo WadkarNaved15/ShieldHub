@@ -14,7 +14,9 @@ const LocationProvider = ({children}) => {
   const [retryCount, setRetryCount] = useState(0);
   const maxRetryCount = 3;
 
-
+useEffect(() => {
+  checkAndRequestLocationPermission();
+}, []);
 
   async function checkAndRequestLocationPermission() {
     try {
@@ -40,7 +42,7 @@ const LocationProvider = ({children}) => {
         granted['android.permission.ACCESS_COARSE_LOCATION'] === 'granted'
       ) {
         setHasPermission(true);
-        // fetchLocation(); // Automatically fetch location after permission is granted
+        fetchLocation(); // Automatically fetch location after permission is granted
       } else {
         Alert.alert('⚠ Location Permission Denied', 'Enable it in settings.', [
           {text: 'Open Settings', onPress: () => Linking.openSettings()},
@@ -67,6 +69,11 @@ const LocationProvider = ({children}) => {
       setLocation(location);
       setRetryCount(0); // reset retry count on success
       await updateRedisLocation(location);
+     
+   
+
+    
+
     } catch (error) {
       console.error('❌ Error fetching location:', error);
 
@@ -98,6 +105,10 @@ const LocationProvider = ({children}) => {
       }
     }
   }
+
+
+  
+
 
   async function updateRedisLocation(location) {
     if (!location) return;

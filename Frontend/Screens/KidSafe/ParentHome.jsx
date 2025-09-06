@@ -52,24 +52,72 @@ const ParentHome = ({ route }) => {
     const [activeTab, setActiveTab] = useState('home');
   
 
-  const fetchLiveLocation = async () => {
-    const res = await apiCall({ url: `/parent/kid-live-location?kidId=${kid._id}`, method: 'GET' });
+  // const fetchLiveLocation = async () => {
+    
+  //   const res = await apiCall({
+  //      url: `/parent/kid-location/${kid._id}`, method: 'GET' });
 
-    if (res.success) {
-      setLocation({
-        latitude: parseFloat(res.location.latitude),
-        longitude: parseFloat(res.location.longitude),
-      });
-      const addr = await reverseGeocode(res.location.latitude, res.location.longitude);
+  //      console.log("📍 API raw response:", res);
+
+  //   if (res.success) {
+  //      const [longitude, latitude] = res.location.coordinates;
+  //     setLocation({
+  //       latitude: parseFloat(res.location.latitude),
+  //       longitude: parseFloat(res.location.longitude),
+  //     });
+
+  //     //  console.log("✅ Parsed coordinates:", { latitude, longitude });
+  //     console.log("✅ Parsed coordinates:", { latitude: location.latitude, longitude: location.longitude });
+
+  //     const addr = await reverseGeocode(res.location.latitude, res.location.longitude);
+  //     setAddress(addr);
+  //   } else {
+  //     console.warn('❌ Location fetch failed:', res.message);
+  //   }
+  // };
+
+
+  const fetchLiveLocation = async () => {
+  try {
+    const res = await apiCall({
+      url: `/parent/kid-location/${kid._id}`,
+      method: 'GET',
+    });
+
+    console.log("📍 API raw response:", res);
+
+    if (res.success && res.location?.coordinates) {
+      const [longitude, latitude] = res.location.coordinates;
+
+      const newLocation = {
+        latitude: parseFloat(latitude),
+        longitude: parseFloat(longitude),
+      };
+
+      setLocation(newLocation);
+
+      console.log("✅ Parsed coordinates:", newLocation);
+
+      const addr = await reverseGeocode(latitude, longitude);
       setAddress(addr);
     } else {
-      console.warn('❌ Location fetch failed:', res.message);
+      console.warn("❌ Location fetch failed:", res.message);
     }
-  };
+  } catch (err) {
+    console.error("❌ Error fetching live location:", err.message);
+  }
+};
+
+
 
   useEffect(() => {
-    fetchLiveLocation();
-  }, []);
+  fetchLiveLocation();
+}, []);
+
+useEffect(() => {
+  if (location) console.log("📍 Location updated:", location);
+}, [location]);
+
 
   return (
     <View style={{ flex: 1 }}>
@@ -80,9 +128,12 @@ const ParentHome = ({ route }) => {
         <Text style={styles.cardTitle}><User size={18} /> Name: <Text style={styles.bold}>{kid.fullName}</Text></Text>
         <Text style={styles.cardText}><Calendar size={18} /> Age: <Text style={styles.bold}>{kid.age}</Text></Text>
         <Text style={styles.cardText}><User size={18} /> Gender: <Text style={styles.bold}>{kid.gender}</Text></Text>
+
+        
       </Card>
 
       {location && (
+        
         <Card style={styles.mapContainer}>
           <MapView
             style={styles.map}
@@ -106,7 +157,6 @@ const ParentHome = ({ route }) => {
         </Card>
       )}
 
-      <Text style={styles.footer}>✨ More features coming soon...</Text>
 
       
     </ScrollView>
