@@ -22,19 +22,34 @@ const options = {
     foregroundServiceType: "mediaPlayback|microphone",
 };
 
+// const backgroundTask = async () => {
+
+//   while (connectToSocket) {
+//     if (!socket || !socket.connected) {
+//       console.log("🔌 Reconnecting WebSocket...");
+//       connectSocket();
+//     }
+//     await new Promise((resolve) => setTimeout(resolve, 5000)); // Keep checking every 5 sec
+//   }
+// };
+
 const backgroundTask = async () => {
+  if (!socket) {
+    connectSocket(); // connect only once
+  }
 
   while (connectToSocket) {
-    if (!socket || !socket.connected) {
-      console.log("🔌 Reconnecting WebSocket...");
-      connectSocket();
-    }
-    await new Promise((resolve) => setTimeout(resolve, 5000)); // Keep checking every 5 sec
+    // no need to reconnect manually here
+    await new Promise((resolve) => setTimeout(resolve, 5000));
   }
 };
 
+
 const connectSocket = () => {
-    if (!socket) {
+   if (socket && socket.connected) {
+    console.log("⚡ Socket already connected");
+    return socket;
+  }
       console.log("🔄 Connecting to WebSocket at:", SOCKET_SERVER_URL);
   
       socket = io(SOCKET_SERVER_URL, {
@@ -71,10 +86,11 @@ const connectSocket = () => {
       socket.on("sos_triggered", () => {
         console.log("🚨 Emergency Detected! Triggering Alert...");
       });
+      
+      return socket;
     }
   
-    return socket;
-  };
+  
   
   
 

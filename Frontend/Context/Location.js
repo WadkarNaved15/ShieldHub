@@ -12,6 +12,7 @@ const LocationProvider = ({children}) => {
   const [location, setLocation] = useState(null);
   const [hasPermission, setHasPermission] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const [isFetching, setIsFetching] = useState(false);
   const maxRetryCount = 3;
 
 useEffect(() => {
@@ -59,6 +60,9 @@ useEffect(() => {
   }
 
   async function fetchLocation() {
+    if (isFetching) return; // don’t start another request
+  setIsFetching(true);
+  
     try {
       const location = await GetLocation.getCurrentPosition({
         enableHighAccuracy: true,

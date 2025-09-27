@@ -112,21 +112,35 @@ useEffect(() => {
 
   const startFeelingUnsafe = async () => {
     try {
+      setIsActive(true);
+        setTimer(selectedInterval * 60);
+        startPulseAnimation();
+
       const response = await apiCall({
         method: "POST",
         url: "/FeelingUnsafe/startFeelingUnsafe",
         data: { interval: parseInt(selectedInterval) },
       });
 
-      if (response.status === 200) {
-        setIsActive(true);
-        setTimer(selectedInterval * 60);
-        await startBackgroundService(); // 🚀 Start Background WebSocket
-        await startRecording(); // 🎙 Start Recording Audio
-        startPulseAnimation();
-        console.log("✅ Feeling Unsafe Mode Activated");
-      }
+      // if (response.status !== 200) {
+      //   setIsActive(false);
+      //   // setTimer(selectedInterval * 60);
+      //   startPulseAnimation();
+      // }
+
+
+       // 🔹 Remove strict status check – just check if message exists
+    if (!response?.message) {
+      throw new Error("Invalid response from server");
+    }
+
+      await startBackgroundService(); // 🚀 Start Background WebSocket
+      await startRecording(); // 🎙 Start Recording Audio
+      console.log("✅ Feeling Unsafe Mode Activated");
     } catch (error) {
+       setIsActive(false);
+        
+        stopPulseAnimation();
       console.error("❌ Failed to start Feeling Unsafe mode:", error);
     }
   };
@@ -161,6 +175,25 @@ const updateInterval = async (interval) => {
     console.error("❌ Failed to update interval:", error);
   }
 };
+
+useEffect(() => {
+  let interval;
+  if (isActive && timer > 0) {
+    interval = setInterval(() => {
+      setTimer((prevTimer) => prevTimer - 1);
+    }, 1000);
+  } else if (!isActive && timer !== selectedInterval * 60) {
+    setTimer(selectedInterval * 60); // Reset timer when stopping "Feeling Unsafe"
+  }
+  return () => clearInterval(interval);
+}, [isActive, timer]);
+  // Function to format time as MM:SS
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
 
 const stopFeelingUnsafe = async () => {
   Alert.alert(
@@ -209,23 +242,6 @@ const stopFeelingUnsafe = async () => {
 
 console.log("Timer", timer, "Selected Interval", selectedInterval, "Is Active", isActive);
 
-useEffect(() => {
-  let interval;
-  if (isActive && timer > 0) {
-    interval = setInterval(() => {
-      setTimer((prevTimer) => prevTimer - 1);
-    }, 1000);
-  } else if (!isActive) {
-    setTimer(selectedInterval * 60); // Reset timer when stopping "Feeling Unsafe"
-  }
-  return () => clearInterval(interval);
-}, [isActive, timer]);
-  // Function to format time as MM:SS
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
 
   // Function to handle activation
  
