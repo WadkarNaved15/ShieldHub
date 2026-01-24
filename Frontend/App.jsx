@@ -21,9 +21,11 @@ const EmergencyNotificationsScreen = require('./Screens/EmergencyNotifications')
 const FeelingUnsafe = require('./Screens/HerShield/FeelingUnsafe');
 const AchievementsScreen = require('./Screens/AchievementsScreen');
 const CrimeReportsScreen = require('./Screens/HerShield/Crime_Reports');
+
 // const HerShieldHeroesScreen = require('./Screens/HerShield/HerShieldHeroesScreen');
 // const HelperRoute = require('./Screens/HelperRoute'); 
 const Marketplace = require('./Screens/HerShield/Marketplace');
+
 const Modules = require('./Screens/Modules');
 const KidSafeHome = require('./Screens/KidSafe/Home');
 
@@ -33,6 +35,7 @@ import ParentLink from './Screens/KidSafe/ParentLink';
 import ParentHome from './Screens/KidSafe/ParentHome'
 import Schedule from './Screens/KidSafe/Schedule';
 import GeoFence from './Screens/KidSafe/GeoFence';
+import HotspotMap from './Screens/HerShield/HotspotMap';
 
 const EmergencyInfo = require('./Screens/HerShield/EmergencyInfo');
 
@@ -155,6 +158,8 @@ function AppContent() {
 <Stack.Screen name="ParentHome" component={ParentHome} />
 <Stack.Screen name="Schedule" component={Schedule} />
 <Stack.Screen name="GeoFence" component={GeoFence} />
+
+<Stack.Screen name="HotspotMap" component={HotspotMap} />
 
 
 

@@ -11,6 +11,7 @@ const {parsePhoneNumberFromString} = require('libphonenumber-js');
 const http = require("http");
 const { processAudio, stopRecognitionStream } = require("./Functions/FeelingUnsafe");
 const auth = require('./middleware/auth'); // Optional if using middleware version
+const hotspotRoutes = require("./routes/Hotspot");
 
 
 
@@ -62,6 +63,8 @@ app.use('/FeelingUnsafe', FeelingUnsafeRouter);
 app.use('/kid', require('./routes/kid'));
 app.use('/parent', parentRoutes);
 app.use('/geofence', geofenceRoutes);
+app.use("/hotspots", hotspotRoutes);
+
 
 
 

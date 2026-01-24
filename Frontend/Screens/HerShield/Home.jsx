@@ -14,10 +14,11 @@ const {ProfileDrawer} = require('../../Components/ProfileDrawer');
 const { UserContext } = require('../../Context/User');
 const { LocationContext } = require('../../Context/Location');
 
+
   
  function Home({ navigation }) {
     const {logout,user} = useContext(UserContext);
-  const { location, hasPermission, fetchLocation, checkAndRequestLocationPermission, updateRedisLocation } = useContext(LocationContext);
+  const { location, hasPermission, fetchLocation, checkAndRequestLocationPermission, updateRedisLocation } = useContext(LocationContext);  
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isModalVisible, setModalVisible] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
@@ -31,7 +32,7 @@ const { LocationContext } = require('../../Context/Location');
     const slideAnim = useRef(new Animated.Value(Dimensions.get('window').width)).current; 
 
     const isFetchingRef = useRef(false);
-  
+
     
     // Image Picker
     const pickImage = () => {

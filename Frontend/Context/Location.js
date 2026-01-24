@@ -59,56 +59,77 @@ useEffect(() => {
     }
   }
 
-  async function fetchLocation() {
-    if (isFetching) return; // don’t start another request
-  setIsFetching(true);
-  
-    try {
-      const location = await GetLocation.getCurrentPosition({
-        enableHighAccuracy: true,
-        timeout: 15000,
-      });
+  useEffect(() => {
+    let intervalId = null;
 
-      console.log('📍 Location provider:', location);
-      setLocation(location);
-      setRetryCount(0); // reset retry count on success
-      await updateRedisLocation(location);
-     
-   
-
-    
-
-    } catch (error) {
-      console.error('❌ Error fetching location:', error);
-
-      if (error.code === 'CANCELLED') {
-        Alert.alert('⚠ Location Error', 'Location request was cancelled.');
-        return;
-      }
-
-      if (error.code === 'UNAVAILABLE') {
-        Alert.alert(
-          '⚠ GPS is Off',
-          'Please turn on GPS to get your location.',
-          [
-            {text: 'Turn On GPS', onPress: checkAndRequestLocationPermission},
-            {text: 'Cancel', style: 'cancel'},
-          ],
-        );
-        return;
-      }
-
-      if (retryCount < maxRetryCount) {
-        setRetryCount(prev => prev + 1);
-        setTimeout(fetchLocation, 2000);
-      } else {
-        Alert.alert(
-          '⚠ Location Error',
-          'Max retries reached. Please check GPS and try again.',
-        );
-      }
+    // Only start the interval if we have permission
+    if (hasPermission) {
+      console.log('✅ Permission granted. Starting periodic location updates...');
+      
+      intervalId = setInterval(() => {
+        console.log('🔁 Triggering periodic location fetch...');
+        fetchLocation();
+      }, 15000); // Set your desired interval here (e.g., 30000 ms = 30 seconds)
     }
+
+    // ⚠️ Crucial: Cleanup function to stop the interval
+    // This runs when the component unmounts or if hasPermission changes.
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+        console.log('🛑 Stopping periodic location fetch.');
+      }
+    };
+  }, [hasPermission]);
+
+
+ async function fetchLocation() {
+  
+
+  try {
+    const location = await GetLocation.getCurrentPosition({
+      enableHighAccuracy: true,
+      timeout: 15000,
+    });
+
+    console.log('📍 Location provider:', location);
+    setLocation(location);
+    setRetryCount(0); // reset retry count on success
+    await updateRedisLocation(location);
+
+  } catch (error) {
+    console.error('❌ Error fetching location:', error);
+
+    if (error.code === 'CANCELLED') {
+      Alert.alert('⚠ Location Error', 'Location request was cancelled.');
+      // No return needed here if we handle isFetching in finally
+    } else if (error.code === 'UNAVAILABLE') {
+      Alert.alert(
+        '⚠ GPS is Off',
+        'Please turn on GPS to get your location.',
+        [
+          { text: 'Turn On GPS', onPress: checkAndRequestLocationPermission },
+          { text: 'Cancel', style: 'cancel' },
+        ],
+      );
+      // No return needed here
+    } else if (retryCount < maxRetryCount) {
+      setRetryCount(prev => prev + 1);
+      setTimeout(fetchLocation, 2000);
+      // We return here so `setIsFetching(false)` isn't called immediately,
+      // as another fetch is about to start.
+      return; 
+    } else {
+      Alert.alert(
+        '⚠ Location Error',
+        'Max retries reached. Please check GPS and try again.',
+      );
+    }
+  } finally {
+    // This will run after success or any error that doesn't retry.
+    setIsFetching(false);
   }
+}
 
 
   
@@ -142,3 +163,24 @@ useEffect(() => {
 };
 
 module.exports = {LocationContext, LocationProvider};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
