@@ -12,7 +12,7 @@
 # Dependencies
 Backend/node_modules/
 Backend/package-lock.json
-# Backend/ML_Models/ind_ppp_2020.tif
+Backend/ML_Models/
 
 # Logs
 Backend/logs/
