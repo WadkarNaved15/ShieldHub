@@ -21,6 +21,8 @@ const EmergencyNotificationsScreen = require('./Screens/EmergencyNotifications')
 const FeelingUnsafe = require('./Screens/HerShield/FeelingUnsafe');
 const AchievementsScreen = require('./Screens/AchievementsScreen');
 const CrimeReportsScreen = require('./Screens/HerShield/Crime_Reports');
+const SafeRoute = require('./Screens/safeRoute').default
+
 
 // const HerShieldHeroesScreen = require('./Screens/HerShield/HerShieldHeroesScreen');
 // const HelperRoute = require('./Screens/HelperRoute'); 
@@ -134,6 +136,8 @@ function AppContent() {
   return (
     <NavigationContainer ref={navigationRef}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
+      
+
         <Stack.Screen name="Logo" component={LogoScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="SignUp" component={SignUpScreen} />
@@ -160,6 +164,7 @@ function AppContent() {
 <Stack.Screen name="GeoFence" component={GeoFence} />
 
 <Stack.Screen name="HotspotMap" component={HotspotMap} />
+<Stack.Screen name="SafeRoute" component={SafeRoute} />
 
 
 

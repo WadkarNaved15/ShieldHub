@@ -12,7 +12,10 @@
 # Dependencies
 Backend/node_modules/
 Backend/package-lock.json
-Backend/ML_Models/
+Backend/ML/safety_model.pkl
+Backend/ML/master_dataset_mumbai.csv
+Backend/ML/ind_ppp_2020.tif
+Backend/ML/cache/
 
 # Logs
 Backend/logs/

@@ -9,7 +9,7 @@ from scipy.spatial import cKDTree
 # ==========================================
 # CONFIGURATION
 # ==========================================
-POP_TIF_PATH = "ind_ppp_2020_1km_Aggregated.tif" 
+POP_TIF_PATH = "ind_ppp_2020.tif" 
 
 # We will grab everything within 1.5km of these centers
 # This covers the whole neighborhood reliably

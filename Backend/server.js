@@ -21,6 +21,7 @@ const AchievementsRouter = require('./routes/Achievements');
 const SosRouter = require('./routes/Sos')
 const UsersRouter = require('./routes/users');
 const FeelingUnsafeRouter = require('./routes/FeelingUnsafe');
+const SafetyRouteRouter = require('./routes/safeRoute');
 const {sendOtp} = require('./utils/Twilio');
 const path = require('path');
 const { initializeCheckIns } = require('./Functions/FeelingUnsafe');
@@ -59,6 +60,7 @@ app.use('/achievements', AchievementsRouter);
 app.use('/sos',SosRouter)
 app.use('/users', UsersRouter);
 app.use('/FeelingUnsafe', FeelingUnsafeRouter);
+app.use('/safeRoute', SafetyRouteRouter);
 
 app.use('/kid', require('./routes/kid'));
 app.use('/parent', parentRoutes);

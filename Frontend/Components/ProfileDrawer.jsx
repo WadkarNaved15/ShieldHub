@@ -36,6 +36,12 @@ const ProfileDrawer = ({ isMenuOpen, slideAnim, toggleMenu, user,navigation, pic
               <MenuItem title="HerShield Heroes" imageKey="HerShield Heroes" onPress={() => navigation.navigate('HerShieldHeroes')} />
               <MenuItem title="UPDATE SOS VOICE SIGNAL" imageKey="Microphone" />
               <MenuItem title="UPDATE CONTROL PIN" imageKey="Lock" />
+              <MenuItem 
+  title="Safe Route" 
+  imageKey="SafeRoute" 
+  onPress={() => navigation.navigate('SafeRoute')} 
+/>
+
               <MenuItem title="LogOut" imageKey="LogOut" onPress={handleLogout} />
             </View>
           </Animated.View>
