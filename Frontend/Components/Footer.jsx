@@ -24,27 +24,62 @@ const Footer = ({ page, display, latitude, longitude,user }) => {
   const [pressStart, setPressStart] = useState(null);
   const pressTimeoutRef = useRef(null);
 
+  const [sosMessage, setSosMessage] = useState(null);
+const [sosActive, setSosActive] = useState(false);
+
+
+  // const handlePressIn = () => {
+  //   setPressStart(Date.now());
+
+  //   pressTimeoutRef.current = setTimeout(async () => {
+  //     try {
+  //       const response = await apiCall({
+  //         url: `/sos/send-sos`,
+  //         method: 'POST',
+  //         data: {
+  //           latitude,
+  //           longitude,
+  //         },
+  //       })
+  //       console.log(response.data);
+  //     } catch (error) {
+  //       console.error('Error sending SOS signal:', error);
+  //     }
+
+  //     navigation.navigate('EmergencyPage');
+  //   }, 2000);
+  // };
+
+
   const handlePressIn = () => {
-    setPressStart(Date.now());
+  setPressStart(Date.now());
 
-    pressTimeoutRef.current = setTimeout(async () => {
-      try {
-        const response = await apiCall({
-          url: `/sos/send-sos`,
-          method: 'POST',
-          data: {
-            latitude,
-            longitude,
-          },
-        })
-        console.log(response.data);
-      } catch (error) {
-        console.error('Error sending SOS signal:', error);
-      }
+  // ✅ STEP 4: Immediate self feedback
+  setSosActive(true);
+  setSosMessage("🚨 SOS activated. Please wait, notifying nearby HerShield users...");
 
-      navigation.navigate('EmergencyPage');
-    }, 2000);
-  };
+  pressTimeoutRef.current = setTimeout(async () => {
+    try {
+      await apiCall({
+        url: `/sos/send-sos`,
+        method: 'POST',
+        data: {
+          latitude,
+          longitude,
+        },
+      });
+
+      // Optional update after success
+      setSosMessage("📍 Location shared. Nearby users have been alerted.");
+    } catch (error) {
+      setSosMessage("⚠️ Failed to send SOS. Please try again.");
+      console.error('Error sending SOS signal:', error);
+    }
+
+    navigation.navigate('EmergencyPage');
+  }, 2000);
+};
+
 
   const handlePressOut = () => {
     clearTimeout(pressTimeoutRef.current);
@@ -53,6 +88,29 @@ const Footer = ({ page, display, latitude, longitude,user }) => {
 
   return (
     <>
+
+    {sosActive && sosMessage && (
+  <View style={{
+    position: 'absolute',
+    bottom: 90,
+    left: 20,
+    right: 20,
+    backgroundColor: '#fff0f0',
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    elevation: 5,
+  }}>
+    <Text style={{ color: 'red', fontWeight: '600', textAlign: 'center' }}>
+      {sosMessage}
+    </Text>
+  </View>
+)}
+
+
+
+
+
       {display && pressStart && <View style={styles.emergencyOverlay} />}
       {display && (
         <TouchableOpacity

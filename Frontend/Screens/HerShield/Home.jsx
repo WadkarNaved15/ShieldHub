@@ -108,23 +108,29 @@ const { LocationContext } = require('../../Context/Location');
 
 
 // 1. Ask for permission, then fetch location
+// useEffect(() => {
+//   if (!hasPermission) {
+//     checkAndRequestLocationPermission();
+//   } else if (!location && !isFetchingRef.current) {
+//     isFetchingRef.current = true;
+//     fetchLocation().finally(() => {
+//       isFetchingRef.current = false;
+//     });
+//   }
+// }, [hasPermission]);
+
 useEffect(() => {
   if (!hasPermission) {
     checkAndRequestLocationPermission();
-  } else if (!location && !isFetchingRef.current) {
-    isFetchingRef.current = true;
-    fetchLocation().finally(() => {
-      isFetchingRef.current = false;
-    });
   }
-}, [hasPermission]);
+}, []);
 
 // 2. Update Redis if location changes externally
-useEffect(() => {
-  if (location) {
-    updateRedisLocation(location);
-  }
-}, [location]);
+// useEffect(() => {
+//   if (location) {
+//     updateRedisLocation(location);
+//   }
+// }, [location]);
 
 
 

@@ -6,6 +6,7 @@ buildscript {
         targetSdkVersion = 35
         ndkVersion = "27.1.12297006"
         kotlinVersion = "1.9.22"
+        googleServicesVersion = '4.4.4'
 
             // ✅ Add this line
         hermesEnabled = true
@@ -18,8 +19,12 @@ buildscript {
         classpath("com.android.tools.build:gradle")
         classpath("com.facebook.react:react-native-gradle-plugin")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
-        classpath 'com.google.gms:google-services:4.3.10'
+        // classpath 'com.google.gms:google-services:4.3.10'
+        // id 'com.google.gms.google-services' version '4.4.4' apply false
+        classpath("com.google.gms:google-services:4.4.4")
     }
 }
 
 apply plugin: "com.facebook.react.rootproject"
+apply plugin: 'com.google.gms.google-services'
+
