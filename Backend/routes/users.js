@@ -3,7 +3,7 @@ const router = express.Router();
 const client = require("../utils/Redis");   
 const {verifyAccessToken} = require("../utils/jwt")
 const {getUser} = require("../utils/users");
-const User = require("../model/Users");
+const Users = require("../model/Users");
 const Achievements = require("../model/Achievements");
 const {getUserFromToken} = require("../Functions/userToken");
 
@@ -33,29 +33,33 @@ const {getUserFromToken} = require("../Functions/userToken");
 
 
 router.put("/fcm-token", async (req, res) => {
-  const { fcm_token } = req.body;
-  const decoded = getUserFromToken(req); // extract user from token
-  const userId = decoded._id;
-
-  if (!userId || !fcm_token) return res.status(400).json({ error: "Invalid data" });
-
   try {
-    console.log(`📩 Saving FCM token for user ${userId}:`, fcm_token);
+    const { fcm_token } = req.body;
+    const decoded = getUserFromToken(req);
+    const userId = decoded._id;
 
-    // Optional: Clean same token from other users to avoid cross-notifications
-    // const allTokens = await client.hgetall("fcm_tokens");
+    if (!userId || !fcm_token) {
+      return res.status(400).json({ error: "Invalid data" });
+    }
 
-    // for (const [uid, token] of Object.entries(allTokens)) {
-    //   if (uid !== userId && token === fcm_token) {
-    //     console.log(`🧹 Removing duplicate token from user ${uid}`);
-    //     await client.hdel("fcm_tokens", uid);
-    //   }
-    // }
+    // 1️⃣ Save to MongoDB (SOURCE OF TRUTH)
+    const user = await Users.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
 
-    // Set current user's token
-    await client.hset("fcm_tokens", userId, fcm_token);
+    user.fcmToken = fcm_token;
+    await user.save();
 
-    res.json({ success: true, message: "FCM token saved successfully" });
+    // 2️⃣ Save to Redis (CACHE – OPTIONAL)
+    await client.hset("fcm_tokens", userId.toString(), fcm_token);
+
+    console.log("✅ FCM token saved:");
+    console.log("   MongoDB → Users.fcmToken");
+    console.log("   Redis   → fcm_tokens:", userId);
+
+    // 3️⃣ Respond ONCE
+    res.json({ success: true });
 
   } catch (error) {
     console.error("❌ Error saving FCM token:", error);

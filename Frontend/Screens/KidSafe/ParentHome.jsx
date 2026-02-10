@@ -7,11 +7,13 @@ import  Card  from '../../Components/Card';
 import { MapPin, User, Calendar, LocateIcon } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 const {
+
   Home,
   Map,
   Bell,
   Users,
   Phone,
+  Image,
   Shield,
   AlertCircle,
   CheckCircle2,
@@ -20,6 +22,7 @@ const {
   School,
   
 } = require('lucide-react-native');
+const {PROVIDER_GOOGLE} = require('react-native-maps');
 
 function NavigationButton({Icon, label, isActive, onPress}) {
   return (
@@ -42,6 +45,7 @@ function NavigationButton({Icon, label, isActive, onPress}) {
     </TouchableOpacity>
   );
 }
+
 
 const ParentHome = ({ route }) => {
   const { kid } = route.params;
@@ -77,6 +81,35 @@ const ParentHome = ({ route }) => {
   // };
 
 
+
+
+  // useEffect(() => {
+  // fetchLiveLocation();
+  // }, []);
+
+
+
+
+
+//   useEffect(() => {
+//   // 1. Fetch the location immediately when the component loads
+//   fetchLiveLocation();
+
+//   // 2. Then, set up an interval to keep fetching every 15 seconds
+//   const intervalId = setInterval(() => {
+//     console.log("🔁 Polling for new kid location...");
+//     fetchLiveLocation();
+//   }, 15000); // 15000 ms = 15 seconds. You can adjust this time.
+
+//   // 3. 🛑 IMPORTANT: This cleanup function stops the interval 
+//   // when the component is unmounted (e.g., user goes to another screen).
+//   return () => {
+//     clearInterval(intervalId);
+//     console.log("🛑 Stopped polling for location.");
+//   };
+// }, [kid._id]); // Add kid._id to re-run if the kid context ever changes.
+
+
   const fetchLiveLocation = async () => {
   try {
     const res = await apiCall({
@@ -110,13 +143,58 @@ const ParentHome = ({ route }) => {
 
 
 
-  useEffect(() => {
-  fetchLiveLocation();
-}, []);
 
 useEffect(() => {
   if (location) console.log("📍 Location updated:", location);
 }, [location]);
+
+ const MapComponent = ({location, user}) => {
+    return (
+      <View
+        style={{
+          height: 200,
+          width: '100%',
+          borderRadius: 15,
+          overflow: 'hidden',
+          marginTop: 15,
+        }}>
+        <MapView
+          provider={PROVIDER_GOOGLE}
+          style={{flex: 1}}
+          region={{
+            latitude: location.latitude,
+            longitude: location.longitude,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+          }}
+          // customMapStyle={customMapStyle}
+        >
+          <Marker
+            coordinate={{
+              latitude: location.latitude,
+              longitude: location.longitude,
+            }}
+            anchor={{x: 0.5, y: 0.5}}>
+            <View style={styles.markerContainer}>
+              <View style={styles.imageContainer}>
+                <Image
+                  source={
+                    user.profileImage
+                      ? {uri: user.profileImage}
+                      : user?.gender === 'Male'
+                      ? require('../../assets/male.png')
+                      : require('../../assets/male.png')
+                  }
+                  style={styles.userImage}
+                />
+              </View>
+              <View style={styles.markerPin} />
+            </View>
+          </Marker>
+        </MapView>
+      </View>
+    );
+  };
 
 
   return (
@@ -134,19 +212,7 @@ useEffect(() => {
 
       {location && (
         
-        <Card style={styles.mapContainer}>
-          <MapView
-            style={styles.map}
-            region={{
-              latitude: location.latitude,
-              longitude: location.longitude,
-              latitudeDelta: 0.01,
-              longitudeDelta: 0.01,
-            }}
-          >
-            <Marker coordinate={location} title="Kid's Location" description="Live tracked" />
-          </MapView>
-        </Card>
+        <MapComponent location={location} user={kid} />
       )}
 
       {location && (
@@ -272,6 +338,31 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
     fontSize: 14,
     marginTop: 40,
+  },
+    markerContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  imageContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: '#8b5cf6',
+    backgroundColor: '#fff',
+  },
+  userImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  markerPin: {
+    width: 10,
+    height: 10,
+    backgroundColor: '#8b5cf6',
+    borderRadius: 5,
+    marginTop: 4,
   },
 });
 

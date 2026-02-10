@@ -60,7 +60,6 @@ useEffect(() => {
         <Text style={styles.headline}>
           Help is on the way
         </Text>
-
         {/* Stylized Map */}
         <View style={styles.mapContainer}>
         <MapView

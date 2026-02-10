@@ -30,5 +30,31 @@ async function getUserLocation(userId) {
   return location ? { longitude: location[0][0], latitude: location[0][1] } : null;
 }
 
+async function getKidLocation(userId) {
+  try {
+    // GEOPOS returns an array of positions, e.g., [[ '72.8777', '19.0760' ]]
+    const locationArray = await client.geopos("users_location", userId);
 
-  module.exports = { getNearestUsers,getUserLocation,updateUserLocation};
+    // Check if the location and its coordinates exist
+    if (locationArray && locationArray[0]) {
+      const [longitude, latitude] = locationArray[0];
+      
+      // Return in a format that matches your client-side expectation (res.location.coordinates)
+      return {
+        coordinates: [
+          parseFloat(longitude),
+          parseFloat(latitude)
+        ]
+      };
+    }
+    // Return null if no location was found for the userId
+    return null;
+  } catch (error) {
+    console.error("❌ Redis Error in getKidLocation:", error);
+    // Propagate the error to be caught by the route handler
+    throw error;
+  }
+}
+
+
+  module.exports = { getNearestUsers,getUserLocation,updateUserLocation,getKidLocation};

@@ -14,6 +14,41 @@ router.post("/nearby-Users", (req, res) => {
     .catch((error) => res.status(500).json({ error: error.message }));
 });
 
+router.get('/kid-location/:kidId', async (req, res) => {
+  try {
+    // 1. Get the kid's ID from the URL parameters
+    const { kidId } = req.params;
+    if (!kidId) {
+      return res.status(400).json({ success: false, message: 'Kid ID is required.' });
+    }
+
+    // 2. Call the function to fetch the location from Redis
+    const location = await getKidLocation(kidId);
+
+    // 3. Handle the response
+    if (location) {
+      // ✅ Success: Location was found
+      res.status(200).json({
+        success: true,
+        location: location
+      });
+    } else {
+      // ⚠️ Not Found: The kid's ID is not in our Redis geo index
+      res.status(404).json({
+        success: false,
+        message: 'Location for the specified kid not found.'
+      });
+    }
+  } catch (error) {
+    // ❌ Server Error: Something went wrong (e.g., Redis connection issue)
+    console.error(`Error on GET /kid-location/${req.params.kidId}:`, error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error.'
+    });
+  }
+});
+
 // router.put("/update-location", async (req, res) => {
 //   try {
 //     const { latitude, longitude } = req.body;

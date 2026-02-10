@@ -82,7 +82,7 @@ router.get('/kid-location/:kidId', auth, async (req, res) => {
     }
 
     // Fetch from Redis
-    const location = await redis.geopos('kid-locations', kidId);
+    const location = await redis.geopos('users_location', kidId);
 
     if (!location || !location[0]) {
       return res.status(404).json({ success: false, message: 'Location not found for this kid' });
