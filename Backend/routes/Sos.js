@@ -21,7 +21,6 @@ router.post("/send-sos", async (req, res) => {
     if (!decoded || !decoded._id) {
   return res.status(401).json({ error: "Unauthorized: Invalid token" });
 }
-
     const victimId = decoded._id;
 
     console.log("🚨 SOS triggered by:", victimId);

@@ -18,6 +18,8 @@
 <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
 
+
+
    <application
         android:name=".MainApplication"
         android:label="@string/app_name"
@@ -27,7 +29,6 @@
         android:theme="@style/AppTheme"
         android:supportsRtl="true"
         android:usesCleartextTraffic="true"
-<<<<<<< HEAD
 
         android:exported="true">
 
@@ -41,15 +42,6 @@
 
 
         
-=======
-        android:exported="true">
-
-        <service android:name="com.voximplant.foregroundservice.VIForegroundService" android:exported="false" />
-        
-        <service 
-            android:name="com.asterinet.react.bgactions.RNBackgroundActionsTask" 
-            android:foregroundServiceType="location|microphone" />
->>>>>>> 1b9b257 (Complete FCM SOS setup and Manifest fixes)
 
         <receiver
             android:name=".BootBroadcastReceiver"
@@ -61,7 +53,7 @@
             </intent-filter>
         </receiver>
 
-<<<<<<< HEAD
+
         <!-- Google Maps API Key -->
        <meta-data
     android:name="com.google.android.geo.API_KEY"
@@ -71,10 +63,13 @@
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version"/>
-=======
-        <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyA00MCM7jgO71Xgg_-j2AaqPzs57QdIHnk"/>
+
+        <meta-data android:name="com.google.android.geo.API_KEY" android:value="${GOOGLE_MAPS_API_KEY}"/>
+
+        <!-- <meta-data android:name="com.google.android.geo.API_KEY" android:value=""/> -->
+
         <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version"/>
->>>>>>> 1b9b257 (Complete FCM SOS setup and Manifest fixes)
+
 
         <activity
             android:name=".MainActivity"
@@ -93,10 +88,6 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-<<<<<<< HEAD
-
-=======
->>>>>>> 1b9b257 (Complete FCM SOS setup and Manifest fixes)
         </activity>
 
     </application>
