@@ -3,7 +3,7 @@ const {createContext, useState, useEffect} = require('react');
 const GetLocation = require('react-native-get-location').default;
 const RNAndroidLocationEnabler = require('react-native-android-location-enabler');
 const {PermissionsAndroid, Alert, Linking} = require('react-native');
-
+const { getToken } = require('../functions/secureStorage');
 const LocationContext = createContext();
 
 const apiCall = require('../functions/axios');
@@ -15,9 +15,32 @@ const LocationProvider = ({children}) => {
   const [isFetching, setIsFetching] = useState(false);
   const maxRetryCount = 3;
 
-useEffect(() => {
-  checkAndRequestLocationPermission();
-}, []);
+// useEffect(() => {
+//   checkAndRequestLocationPermission();
+// }, []);
+
+//  useEffect(() => {
+//     let intervalId = null;
+
+//     // Only start the interval if we have permission
+//     if (hasPermission) {
+//       console.log('✅ Permission granted. Starting periodic location updates...');
+      
+//       intervalId = setInterval(() => {
+//         console.log('🔁 Triggering periodic location fetch...');
+//         fetchLocation();
+//       }, 15000); // Set your desired interval here (e.g., 30000 ms = 30 seconds)
+//     }
+
+//     // ⚠️ Crucial: Cleanup function to stop the interval
+//     // This runs when the component unmounts or if `hasPermission` changes.
+//     return () => {
+//       if (intervalId) {
+//         clearInterval(intervalId);
+//         console.log('🛑 Stopping periodic location fetch.');
+//       }
+//     };
+//   }, [hasPermission]); 
 
   async function checkAndRequestLocationPermission() {
     try {
@@ -58,6 +81,8 @@ useEffect(() => {
       );
     }
   }
+
+
 
   async function fetchLocation() {
     if (isFetching) return; // don’t start another request
@@ -107,7 +132,9 @@ useEffect(() => {
           'Max retries reached. Please check GPS and try again.',
         );
       }
-    }
+    }finally {
+    setIsFetching(false);
+  }
   }
 
 
@@ -115,6 +142,8 @@ useEffect(() => {
 
 
   async function updateRedisLocation(location) {
+    const token = await getToken('accessToken');
+if (!token) return;
     if (!location) return;
     try {
       const response = await apiCall({

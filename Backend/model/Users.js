@@ -25,6 +25,14 @@ const userSchema = new mongoose.Schema({
     enum: ['Male', 'Female'],
     required: true
   },
+
+
+  fcmToken: {
+  type: String,
+  default: null,
+},
+
+
   // aadharNumber: {
   //   type: String,
   //   // required: true,

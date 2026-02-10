@@ -14,31 +14,35 @@
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+<uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
 
-    <application
+
+
+   <application
         android:name=".MainApplication"
         android:label="@string/app_name"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:allowBackup="false"
         android:theme="@style/AppTheme"
-        android:supportsRtl="true">
+        android:supportsRtl="true"
+        android:usesCleartextTraffic="true"
+
+        android:exported="true">
 
         <service android:name="com.voximplant.foregroundservice.VIForegroundService"
-         android:exported="false"> </service>
+         android:exported="false" /> 
         <!-- Background Actions Service -->
-        <service android:name="com.asterinet.react.bgactions.RNBackgroundActionsTask" android:foregroundServiceType="shortService"/>
-        <!-- Fcm Cloud Messaging Service -->
-        <service android:name=".MyFirebaseMessagingService"
-                android:exported="true">  
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
+       
+       <service
+            android:name="com.asterinet.react.bgactions.RNBackgroundActionsTask"
+            android:foregroundServiceType="location|microphone" />
 
 
-        <!-- Boot Receiver (Auto Restart on Reboot) -->
+        
+
         <receiver
             android:name=".BootBroadcastReceiver"
             android:enabled="true"
@@ -49,15 +53,23 @@
             </intent-filter>
         </receiver>
 
+
         <!-- Google Maps API Key -->
        <meta-data
     android:name="com.google.android.geo.API_KEY"
-    android:value="${GOOGLE_MAPS_API_KEY}"/>
+     android:value="${GOOGLE_MAPS_API_KEY}" />
 
         <!-- Required for Google Play Services -->
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version"/>
+
+        <meta-data android:name="com.google.android.geo.API_KEY" android:value="${GOOGLE_MAPS_API_KEY}"/>
+
+        <!-- <meta-data android:name="com.google.android.geo.API_KEY" android:value=""/> -->
+
+        <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version"/>
+
 
         <activity
             android:name=".MainActivity"
@@ -72,6 +84,10 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
 
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
 
     </application>

@@ -52,6 +52,14 @@ Frontend/android/*.iml
 Frontend/android/*.hprof
 Frontend/android/*.keystore
 !Frontend/android/debug.keystore
+Frontend/android/captures/
+Frontend/android/app/release/*.keystore
+Frontend/android/app/debug.keystore.lock
+
+
+# Firebase configuration
+Frontend/android/app/google-services.json
+Frontend/ios/Runner/GoogleService-Info.plist
 
 # iOS / Xcode
 Frontend/ios/build/
