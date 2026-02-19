@@ -36,7 +36,7 @@ router.post("/send-sos", async (req, res) => {
 
     const nearbyUserIds = nearby
       .map(u => u.userId)
-      .filter(id => id !== victimId.toString()) // Compare as strings
+      // .filter(id => id !== victimId.toString()) // Compare as strings
       .map(id => new mongoose.Types.ObjectId(id)); // Convert for MongoDB query
 
 

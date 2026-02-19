@@ -4,6 +4,7 @@
 
 # macOS
 .DS_Store
+hershield-key.pem
 
 # ============================
 # 🧠 BACKEND (Node.js)
