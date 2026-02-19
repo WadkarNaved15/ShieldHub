@@ -117,4 +117,4 @@ def predict_safety():
 
 if __name__ == '__main__':
     print("--- READY TO SERVE REQUESTS ---")
-    app.run(port=5001, debug=False)
+    app.run(port=5001, debug=False,threaded=False)

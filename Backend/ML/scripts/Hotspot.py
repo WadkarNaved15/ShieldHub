@@ -15,6 +15,7 @@ db = DBSCAN(eps=epsilon, min_samples=3, algorithm='ball_tree', metric='haversine
 # 3. Extract clusters
 labels = db.labels_
 clusters = []
+
 for cluster_id in set(labels):
     if cluster_id == -1:  # noise
         continue
@@ -30,8 +31,3 @@ for cluster_id in set(labels):
         "radius": radius,
         "count": len(cluster_points)
     })
-
-         
-         
-         
-         return clusters

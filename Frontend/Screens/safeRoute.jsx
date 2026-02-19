@@ -1,11 +1,4 @@
 
-
-
-
-
-
-
-
 import React, { useState, useRef, useContext, useEffect } from 'react';
 import { 
   View, 
@@ -74,6 +67,7 @@ const SafeRouteScreen = () => {
 
   // --- REUSABLE FUNCTION: REVERSE GEOCODE ---
   const fillAddressFromCoordinates = async (lat, lng) => {
+    console.log("Filling address for coords:", lat, lng);
     setAddressLoading(true);
     try {
       // 1. Zoom Map to location
