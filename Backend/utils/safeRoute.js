@@ -46,6 +46,7 @@ console.log("DEBUG: API Key is ->", process.env.GOOGLE_MAPS_API_KEY);
         });
         return response.data.safety_score;
     } catch (error) {
+        console.error("Python API Failed:", error.message);
         return 50; // Fallback score if Python is down
     }
 };

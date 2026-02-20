@@ -253,4 +253,4 @@ def predict_safety():
 
 if __name__ == '__main__':
     print("--- READY TO SERVE REQUESTS ---")
-    app.run(port=5001, debug=False, threaded=False)
+    app.run(host='0.0.0.0', port=5001, debug=False, threaded=False)
