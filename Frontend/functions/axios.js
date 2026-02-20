@@ -4,7 +4,7 @@ const { getToken, saveToken } = require('./secureStorage');
 
 // Create an Axios instance for API requests
 const axiosInstance = axios.create({
-  baseURL: BACKEND_URI, 
+  baseURL: 'http://13.232.140.218:3000', 
   // baseURL: 'http://192.168.32.234:3000',
   timeout: 10000, 
 });

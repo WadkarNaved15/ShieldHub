@@ -3,9 +3,10 @@ const { useState } = require('react');
 const { View, TextInput, Button, Image, Text, StyleSheet, Alert } = require('react-native');
 const { launchImageLibrary } = require('react-native-image-picker');
 const axios = require('axios').default;
+import { BACKEND_URI } from '@env';
 
 
-const BACKEND_URI = process.env.BACKEND_URI || 'http://your-backend-url.com';
+
 
  function AchievementForm() {
     const [title, setTitle] = useState('');

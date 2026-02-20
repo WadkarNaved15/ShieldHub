@@ -21,9 +21,11 @@ import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import Geocoder from 'react-native-geocoding';
 import { LocationContext } from '../Context/Location';
+import { BACKEND_URI } from '@env';
+import{ GOOGLE_MAPS_API_KEY } from '@env';
 
 // ⚠️ Ensure your API Key is set here
-Geocoder.init(process.env.GOOGLE_MAPS_API_KEY || '');  
+Geocoder.init(GOOGLE_MAPS_API_KEY || '');  
 
 const { width, height } = Dimensions.get('window');
 
@@ -132,7 +134,7 @@ const SafeRouteScreen = () => {
     setRoutes([]); 
 
     try {
-      const API_URL = `${process.env.BACKEND_URI}/safeRoute`; 
+      const API_URL = `${BACKEND_URI}/safeRoute`; 
       const response = await axios.post(API_URL, { origin, destination });
 
       if (response.data.success && response.data.routes.length > 0) {
