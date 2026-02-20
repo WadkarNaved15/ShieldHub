@@ -7,6 +7,8 @@ services:
     ports:
       - "5001:5001"
     restart: always
+    env_file:          # <-- ADD THIS LINE
+      - .env           # <-- ADD THIS LINE
 
   node-api:
     build: .
