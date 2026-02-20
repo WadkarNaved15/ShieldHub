@@ -215,6 +215,7 @@ def get_features_from_coords(lat, lon, time_hour):
     
     # 4. Crime Count 
     crime_count = 0 
+    print(f"Features for ({lat}, {lon}): Pop={population}, PoliceDist={police_dist_km}km, Time={time_hour}h")
     
     return [population, police_dist_km, is_main_road, crime_count, time_hour]
 
