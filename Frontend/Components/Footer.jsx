@@ -76,7 +76,9 @@ const [sosActive, setSosActive] = useState(false);
       console.error('Error sending SOS signal:', error);
     }
 
-    navigation.navigate('EmergencyPage');
+    // navigation.navigate('EmergencyPage');
+    navigation.navigate('VictimTracking');
+
   }, 2000);
 };
 

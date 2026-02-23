@@ -25,57 +25,54 @@ if (!admin.apps.length) {
   //   }
   // };
 
-
-  const sendNotification = async (tokens,
+const sendNotification = async (
+  tokens,
   victimId,
+  victimName,
   location,
-  type = "NEARBY_SOS") =>
-     {
-
+  type = "NEARBY_SOS"
+) => {
   try {
     if (!tokens || tokens.length === 0) {
       console.log("❌ No FCM tokens provided");
       return;
     }
 
-   const payload = {
-   notification: {
+    const payload = {
+      notification: {
         title: "🚨 Emergency SOS Alert",
-        body: "A user near you needs help! Tap for details.",
+        body: `${victimName} near you needs help! Tap to view the route.`,
       },
 
       android: {
         priority: "high",
         notification: {
           channelId: "shieldhub-alerts",
-           smallIcon: "ic_notification",
-          sound: "default",
+          importance: 4,
+          sound: "siren",
           visibility: "public",
         },
       },
 
       data: {
+        screen: "ResponderMap",
         victimId: String(victimId),
-        latitude: String(location.latitude),
-        longitude: String(location.longitude),
+        victimName: String(victimName),
+        initialLat: String(location.latitude),
+        initialLon: String(location.longitude),
         type: String(type),
       },
     };
 
-     // const response = await admin.messaging().send(payload);
     const response = await admin.messaging().sendEachForMulticast({
-  tokens,
-  ...payload,
-});
+      tokens,
+      ...payload,
+    });
 
-    console.log("✅ SOS notification sent");
+    console.log(`✅ SOS sent to ${response.successCount} responders`);
   } catch (error) {
     console.error("❌ Error sending FCM notification:", error);
   }
 };
 
-
-   
-
-
-  module.exports = { sendNotification };
+module.exports = { sendNotification };

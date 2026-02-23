@@ -30,6 +30,24 @@ const {getUserFromToken} = require("../Functions/userToken");
 
 
 
+// GET USER BY ID
+router.get('/:id', async (req, res) => {
+  try {
+    const user = await Users.findById(req.params.id).select(
+      'fullName phoneNumber role'
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json(user);
+  } catch (err) {
+    console.error('❌ Get user error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 
 
 router.put("/fcm-token", async (req, res) => {

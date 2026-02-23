@@ -25,6 +25,7 @@ const CrimeReportsScreen = require('./Screens/HerShield/Crime_Reports');
 // const HelperRoute = require('./Screens/HelperRoute'); 
 const Marketplace = require('./Screens/HerShield/Marketplace');
 const Modules = require('./Screens/Modules');
+
 const KidSafeHome = require('./Screens/KidSafe/Home');
 
 import KidModeScreen from './Screens/KidSafe/KidModeScreen';
@@ -33,11 +34,14 @@ import ParentLink from './Screens/KidSafe/ParentLink';
 import ParentHome from './Screens/KidSafe/ParentHome'
 import Schedule from './Screens/KidSafe/Schedule';
 import GeoFence from './Screens/KidSafe/GeoFence';
+
 import { useNavigation } from '@react-navigation/native';
 import messaging from '@react-native-firebase/messaging';
 import firebase from '@react-native-firebase/app';
 // import PushNotification from 'react-native-push-notification';
 import notifee, { AndroidImportance } from '@notifee/react-native';
+import ResponderMap from './Screens/ResponderMap';
+import VictimTracking from './Screens/VictimTracking';
 
 
 const EmergencyInfo = require('./Screens/HerShield/EmergencyInfo');
@@ -200,6 +204,7 @@ useEffect(() => {
       // 2. Only start FCM if the user is logged in
       if (!loading && isAuthenticated) {
         console.log("🚀 Starting FCM Services...");
+       
         await FCMService.requestPermission();
         await FCMService.getFCMToken();
         await FCMService.listenForNotifications();
@@ -297,6 +302,21 @@ useEffect(() => {
 <Stack.Screen name="ParentHome" component={ParentHome} />
 <Stack.Screen name="Schedule" component={Schedule} />
 <Stack.Screen name="GeoFence" component={GeoFence} />
+<Stack.Screen 
+  name="ResponderMap" 
+  component={ResponderMap} 
+  options={{ title: 'Emergency Response' }} 
+/>
+
+<Stack.Screen 
+  name="VictimTracking" 
+  component={VictimTracking} 
+  options={{ 
+    headerShown: false, 
+    gestureEnabled: false // Prevents accidental exit
+  }} 
+/>
+
 
 
 

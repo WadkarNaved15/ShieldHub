@@ -1,6 +1,9 @@
 apply plugin: "com.android.application"
+apply plugin: 'com.google.gms.google-services' 
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
+apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.gradle"
+
 // Add this line
 
 
@@ -91,8 +94,10 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+        // .env file se key uthayega, agar nahi mili toh empty string
+        def envKey = project.env.get("GOOGLE_MAPS_API_KEY") ?: ""
           manifestPlaceholders = [
-    GOOGLE_MAPS_API_KEY: googleMapsApiKey
+    GOOGLE_MAPS_API_KEY: envKey
 ]
     }
     signingConfigs {
@@ -129,5 +134,3 @@ dependencies {
         implementation jscFlavor
     }
 }
-
-apply plugin: 'com.google.gms.google-services' 

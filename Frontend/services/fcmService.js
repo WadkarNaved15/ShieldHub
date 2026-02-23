@@ -1,19 +1,61 @@
-const messaging = require('@react-native-firebase/messaging').default;
-const firebase = require('@react-native-firebase/app').default;
-const {saveToken,getToken} = require('../functions/secureStorage');
-const { Alert } = require('react-native');
-const apiCall = require('../functions/axios');
-import notifee, { AndroidImportance } from '@notifee/react-native';
+import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
+import { Linking, Alert } from 'react-native';
 
-const BACKEND_URI =  process.env.BACKEND_URI;  // Update with your backend
+// Sabko ek hi style mein rakhein
+const messaging = require('@react-native-firebase/messaging').default;
+const { saveToken, getToken } = require('../functions/secureStorage');
+const apiCall = require('../functions/axios');
+const navigationService = require('./navigationService'); 
 
 let listenersInitialized = false;
+
+const BACKEND_URI =  process.env.BACKEND_URI;  // Update with your backend
+// --- FOREGROUND LISTENER ---
+// 1. Foreground Listener ko function ke andar le aayein taaki scope sahi rahe
+const setupForegroundListener = () => {
+  notifee.onForegroundEvent(({ type, detail }) => {
+    const { notification, pressAction } = detail;
+    const data = notification?.data;
+    console.log('🔔 Notification data:', data);
+
+    // if (!data || data.screen !== 'ResponderMap') return;
+     if (!data || !data.victimId) return; // ✅ relaxed check
+
+    if (
+      type === EventType.PRESS ||
+      (type === EventType.ACTION_PRESS && pressAction.id === 'accept_mission')
+    ) {
+      navigationService.navigate('ResponderMap', {
+  victimId: data.victimId,
+  // victimName: data.victimName,
+  initialLat: Number(data.latitude),   // ✅ MATCH REAL KEYS
+        initialLon: Number(data.longitude),
+
+        phoneNumber: data.phoneNumber // ✅ Pass phone number to map
+});
+    }
+
+    if (type === EventType.ACTION_PRESS && pressAction.id === 'call_police') {
+      Linking.openURL('tel:100');
+    }
+  });
+};
+
+// let navigationRef = null;
+
+
+
 const FCMService = {
+
+  // Add this new method
+  // setNavigation(ref) {
+  //   navigationRef = ref;
+  // },
 
     async requestPermission() {
         try {
             console.log("messaging",messaging)
-            console.log("firebase",firebase)
+            // console.log("firebase",firebase)
             const authStatus = await messaging().requestPermission();
             const enabled =
                 authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
@@ -77,24 +119,6 @@ async getFCMToken() {
 
 
 
-// async getFCMToken() {
-//   try {
-//     // Force generate a new token on login
-//     await messaging().deleteToken(); // 💥 This clears any previous token
-    
-//     const freshToken = await messaging().getToken(); // 🆕 New token for this user
-//     console.log("🎯 Fresh FCM Token:", freshToken);
-    
-//     await saveToken('fcmToken', freshToken); // secure local storage
-
-//     // Send to backend with current JWT in header
-//     await apiCall({ url: '/users/fcm-token', method: 'PUT', data: { fcm_token: freshToken } });
-
-//   } catch (error) {
-//     console.error("❌ Error getting FCM token:", error);
-//   }
-// },
-
 
 
 
@@ -128,136 +152,11 @@ async getFCMToken() {
   }
 },
 
-//     async listenForNotifications() {
-//         // messaging().onMessage(async remoteMessage => {
-//         //     console.log('Foreground FCM Message:', remoteMessage);
-//         //     Alert.alert(remoteMessage.notification.title, remoteMessage.notification.body);
-//         // });
-
-
-
-//         // messaging().setBackgroundMessageHandler(async remoteMessage => {
-//         //     console.log('Background/Killed FCM Message:', remoteMessage);
-//         // });
-
-
-
-//         messaging().onMessage(async remoteMessage => {
-//   console.log('Foreground FCM Message:', JSON.stringify(remoteMessage, null, 2));
-
-//   if (remoteMessage.notification) {
-//     Alert.alert(
-//       remoteMessage.notification.title ?? 'Alert',
-//       remoteMessage.notification.body ?? 'You have a new message'
-//     );
-//   } else if (remoteMessage.data?.type === 'NEARBY_SOS') {
-//     Alert.alert(
-//       '🚨 Emergency SOS Alert',
-//       'A user near you needs help!'
-//     );
-//   }
-// });
-
-//         messaging().onNotificationOpenedApp(remoteMessage => {
-//             console.log('Notification opened from background:', remoteMessage);
-//         });
-
-//         messaging().getInitialNotification().then(remoteMessage => {
-//             if (remoteMessage) {
-//                 console.log('Notification opened from killed state:', remoteMessage);
-//             }
-//         });
-
-//         messaging().onTokenRefresh(async token => {
-//             console.log('FCM Token Refreshed:', token);
-
-//             // Update the new token securely in Keychain
-//             await saveToken('fcmToken', token);
-
-//             // Send updated token to backend
-//             // await apiCall({ url: `${BACKEND_URI}/users/fcm-token`, method: 'PUT', data: { fcm_token: token } });
-//                 await apiCall({ url: '/users/fcm-token', method: 'PUT', data: { fcm_token: token } });
-
-//         });
-//     }
-
-
-
-
-
-
-
-// async listenForNotifications() {
-//   if (listenersInitialized) {
-//     console.log('🔁 FCM listeners already initialized');
-//     return;
-//   }
-//   listenersInitialized = true;
-
-//   messaging().onMessage(async remoteMessage => {
-//     console.log('Foreground FCM Message:', JSON.stringify(remoteMessage, null, 2));
-
-//     if (remoteMessage.notification) {
-//       Alert.alert(
-//         remoteMessage.notification.title ?? 'Alert',
-//         remoteMessage.notification.body ?? 'You have a new message'
-//       );
-//     } else if (remoteMessage.data?.type === 'NEARBY_SOS') {
-//       Alert.alert(
-//         '🚨 Emergency SOS Alert',
-//         'A user near you needs help!'
-//       );
-//     }
-//   });
-
-//   messaging().onNotificationOpenedApp(remoteMessage => {
-//     console.log('Notification opened from background:', remoteMessage);
-//   });
-
-//   messaging().getInitialNotification().then(remoteMessage => {
-//     if (remoteMessage) {
-//       console.log('Notification opened from killed state:', remoteMessage);
-//     }
-//   });
-
-//   messaging().onTokenRefresh(async token => {
-//     console.log('FCM Token Refreshed:', token);
-//     await saveToken('fcmToken', token);
-//     await apiCall({ url: '/users/fcm-token', method: 'PUT', data: { fcm_token: token } });
-//   });
-// }
-
-
-
-
-
-
-
-// async listenForNotifications() {
-//   if (listenersInitialized) return;
-//   listenersInitialized = true;
-
-//   messaging().onMessage(async remoteMessage => {
-//     console.log('📩 Foreground FCM:', remoteMessage.data);
-
-//     await notifee.displayNotification({
-//       title: remoteMessage.data.title,
-//       body: remoteMessage.data.body,
-//       android: {
-//         channelId: 'shieldhub-alerts',
-//         importance: notifee.AndroidImportance.HIGH,
-//         pressAction: {
-//           id: 'default',
-//         },
-//       },
-//     });
-//   });
-// }
 
 
 async listenForNotifications() {
   console.log('🛠️ Attempting to initialize FCM Listeners...');
-Alert.alert("Debug", "listenForNotifications has started!");
+// Alert.alert("Debug", "listenForNotifications has started!");
 
   if (listenersInitialized) {
     console.log('🔁 Listeners already active, skipping...');
@@ -265,6 +164,9 @@ Alert.alert("Debug", "listenForNotifications has started!");
   }
   listenersInitialized = true;
 
+  setupForegroundListener();
+
+  await notifee.deleteChannel('shieldhub-alerts');
   // 1. Create the channel first!
   try {
     console.log('📺 Creating Notifee Channel...');
@@ -272,7 +174,7 @@ Alert.alert("Debug", "listenForNotifications has started!");
       id: 'shieldhub-alerts',
       name: 'Emergency Alerts',
       importance: AndroidImportance.HIGH,
-      sound: 'default',
+      sound: 'siren',
       vibration: true,
     });
     console.log('✅ Channel Created/Verified:', channelId);
@@ -288,26 +190,165 @@ Alert.alert("Debug", "listenForNotifications has started!");
     const title = remoteMessage.data?.title || remoteMessage.notification?.title || "Emergency SOS";
     const body = remoteMessage.data?.body || remoteMessage.notification?.body || "A user near you needs help!";
 
-    await notifee.displayNotification({
-      title: title,
-      body: body,
-      android: {
-        channelId: 'shieldhub-alerts', // Must match the registered category
-        importance: AndroidImportance.HIGH,
-        priority: 'high',
-        pressAction: { id: 'default' },
+   await notifee.displayNotification({
+  title: '🚨 Emergency SOS Alert! 🚨',
+  body: 'A user near you needs immediate help.',
+  // data: { 
+  //   victimId: '...', // Make sure this is passed from FCM
+  //   screen: 'ResponderMap' 
+  // },
+  data: remoteMessage.data, // ✅ VERY IMPORTANT
+  android: {
+    channelId: 'shieldhub-alerts',
+    importance: AndroidImportance.HIGH,
+    sound: 'siren',
+    pressAction: { id: 'default' }, // Tapping the notification body
+    actions: [
+      {
+        title: '🏃 I am Coming',
+        pressAction: { 
+          id: 'accept_mission', 
+          launchActivity: 'default' // 👈 MANDATORY for the button to show
+        },
       },
-    });
+      {
+        title: '📞 Inform Police',
+        pressAction: { 
+          id: 'call_police' 
+        },
+      },
+    ],
+  },
+});
   } catch (err) {
     console.error("❌ Notifee Display Error:", err);
   }
 });
+
+// Add this inside listenForNotifications()
+// notifee.onForegroundEvent(({ type, detail }) => {
+//  if (type === EventType.PRESS) {
+//     console.log('User pressed the notification in foreground', detail.notification);
+    
+//     const data = detail.notification?.data;
+//     if (data?.screen === 'ResponderMap') {
+//       // Use your navigation reference to move to the map
+//       navigationRef.navigate('ResponderMap', {
+//         victimId: data.victimId,
+//        initialLat: data.latitude, // Use the keys from your log: 'latitude'
+//          initialLon: data.longitude,
+//         victimName: data.victimName
+//       });
+//     }
+//   }
+// });
+
+
+
+
+// notifee.onForegroundEvent(({ type, detail }) => {
+//   if (type === EventType.PRESS) {
+//     const data = detail.notification?.data;
+//     console.log("🔔 Data from notification:", data);
+    
+//     console.log("🔗 Is NavigationRef null?", navigationRef === null);
+//     if ((data?.screen === 'ResponderMap' || data?.victimId) && navigationRef) {
+//       // ✅ Wrap in a readiness check
+//       if (navigationRef.isReady()) {
+//         navigationRef.navigate('ResponderMap', {
+//           victimId: data.victimId,
+//           initialLat: data.latitude, 
+//           initialLon: data.longitude,
+//           victimName: data.victimName
+//         });
+//       } else {
+//         // If not ready, wait 500ms and try once more
+//         console.log("🗺️ Is NavigationRef Ready?", navigationRef?.isReady());
+//         setTimeout(() => {
+//           if (navigationRef.isReady()) {
+//             navigationRef.navigate('ResponderMap', {
+//               victimId: data.victimId,
+//               initialLat: data.latitude,
+//               initialLon: data.longitude,
+//             });
+//           }
+//         }, 500);
+//       }
+//     }
+//   }
+// });
+
+// In FCMService.js, inside the onForegroundEvent or onBackgroundEvent
+// notifee.onForegroundEvent(({ type, detail }) => {
+//   const { notification, pressAction } = detail;
+
+//   if (type === EventType.ACTION_PRESS) {
+//     if (pressAction.id === 'accept_mission') {
+//       console.log('User clicked I am coming');
+//       // Navigate to the responder screen
+//       navigationService.navigate('ResponderMap', { 
+//          victimId: notification.data.victimId,
+//          victimName: notification.data.victimName 
+//       });
+//     }
+
+//     if (pressAction.id === 'call_police') {
+//       console.log('User clicked Inform Police');
+//       // This opens the phone dialer with 100 pre-filled
+//       Linking.openURL('tel:100');
+//     }
+//   }
+
+//   // Also handle clicking the notification itself (not just the button)
+//   if (type === EventType.PRESS) {
+//     navigationService.navigate('ResponderMap', { 
+//       victimId: notification.data?.victimId 
+//     });
+//   }
+// });
+
+// 1. When the app is in background but still running
+messaging().onNotificationOpenedApp(remoteMessage => {
+  console.log('Notification caused app to open from background:', remoteMessage.data);
+  if (remoteMessage.data?.screen === 'ResponderMap') {
+    navigationService.navigate('ResponderMap', {
+  victimId: remoteMessage.data.victimId,
+  // victimName: remoteMessage.data.victimName,
+  initialLat: Number(remoteMessage.data.initialLat),
+  initialLon: Number(remoteMessage.data.initialLon),
+  phoneNumber: remoteMessage.data.phoneNumber
+});
+  }
+});
+
+// 2. When the app is completely closed (Quit state)
+messaging()
+  .getInitialNotification()
+  .then(remoteMessage => {
+    if (remoteMessage) {
+      console.log('Notification caused app to open from quit state:', remoteMessage.data);
+      if (remoteMessage.data?.screen === 'ResponderMap') {
+        // You might need a small delay or check if navigation is ready
+        setTimeout(() => {
+          navigationService.navigate('ResponderMap', {
+  victimId: remoteMessage.data.victimId,
+  // victimName: remoteMessage.data.victimName,
+  initialLat: Number(remoteMessage.data.initialLat),
+  initialLon: Number(remoteMessage.data.initialLon),
+  phoneNumber: remoteMessage.data.phoneNumber
+});
+        }, 500);
+      }
+    }
+  });
+
+
 }
 
 
 
 
-};3
+};
 
 
 module.exports = FCMService;

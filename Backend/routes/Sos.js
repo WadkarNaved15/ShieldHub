@@ -34,6 +34,7 @@ router.post("/send-sos", async (req, res) => {
     //   .map(u => u.userId)
     //   .filter(id => id !== victimId);
 
+
     const nearbyUserIds = nearby
       .map(u => u.userId)
       .filter(id => id !== victimId.toString()) // Compare as strings
