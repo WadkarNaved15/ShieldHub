@@ -1,6 +1,6 @@
 import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
 import { Linking, Alert } from 'react-native';
-
+// import { BACKEND_URI } from '@env';
 // Sabko ek hi style mein rakhein
 const messaging = require('@react-native-firebase/messaging').default;
 const { saveToken, getToken } = require('../functions/secureStorage');
@@ -9,7 +9,7 @@ const navigationService = require('./navigationService');
 
 let listenersInitialized = false;
 
-const BACKEND_URI =  process.env.BACKEND_URI;  // Update with your backend
+// const BACKEND_URI =  process.env.BACKEND_URI;  // Update with your backend
 // --- FOREGROUND LISTENER ---
 // 1. Foreground Listener ko function ke andar le aayein taaki scope sahi rahe
 const setupForegroundListener = () => {

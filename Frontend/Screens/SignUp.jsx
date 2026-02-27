@@ -4,6 +4,7 @@ const { View, StyleSheet, Text, TextInput, TouchableOpacity, Alert } = require('
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
 const { useNavigation } = require('@react-navigation/native');
 const axios = require('axios').default;
+import { BACKEND_URI } from'@env';
 
 const SignUp = () => {
     const insets = useSafeAreaInsets();
@@ -26,7 +27,7 @@ const SignUp = () => {
             return;
         }
         try {
-            const response = await axios.post(`${process.env.BACKEND_URI}/send-otp`, { phoneNumber });
+            const response = await axios.post(`${BACKEND_URI}/send-otp`, { phoneNumber });
             if (response.status === 200) {
                 setShowOtpInput(true);
                 Alert.alert('Success', 'OTP sent to your phone number');
@@ -47,7 +48,7 @@ const SignUp = () => {
         }
         try {
             console.log("otp",otp)
-            const response = await axios.post(`${process.env.BACKEND_URI}/verify-otp`, { phoneNumber, otp });
+            const response = await axios.post(`${BACKEND_URI}/verify-otp`, { phoneNumber, otp });
             if (response.status === 200) {
                 setOtpVerified(true);
                 Alert.alert('Success', 'OTP verified successfully');
@@ -130,7 +131,7 @@ const SignUp = () => {
         // }
     
         try {
-            const response = await axios.post(`${process.env.BACKEND_URI}/register`, {
+            const response = await axios.post(`${BACKEND_URI}/register`, {
                 fullName,
                 phoneNumber,
                 password,

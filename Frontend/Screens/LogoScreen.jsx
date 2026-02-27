@@ -36,7 +36,7 @@ const LogoScreen = ({ navigation }) => {
 
   return (
     <View style={styles.splashContainer}>
-      <Image source={require('../assets/HerShield.jpeg')} style={styles.logo} />
+      <Image source={require('../assets/HerShield.png')} style={styles.logo} />
       <Text style={styles.splashText}>Welcome to HerShield</Text>
 
       {loading && <ActivityIndicator size="large" color="#ffffff" />}

@@ -5,10 +5,11 @@ const { useNavigation } = require('@react-navigation/native');
 const Ionicons = require('react-native-vector-icons/Ionicons').default;
 const Share = require('react-native-share');
 const Footer = require('../../Components/Footer')
-const BackendUri = process.env.BACKEND_URI;
+
 const axios = require('axios').default;
 const defaultMaleImage = require('../..//assets/male.png');
 const defaultFemaleImage = require('../../assets/female.png');
+
 
 
 const achievementsData = [

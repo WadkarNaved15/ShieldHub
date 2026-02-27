@@ -6,6 +6,8 @@ import { UserContext } from '../Context/User';
 import io from 'socket.io-client';
 import { ShieldCheck, PhoneCall, XCircle } from 'lucide-react-native';
 import { Animated, Easing } from 'react-native';
+import { BACKEND_URI } from '@env';
+import{ GOOGLE_MAPS_API_KEY } from '@env';
 
 const VictimTracking = ({ navigation }) => {
     const { location: myLocation } = useContext(LocationContext);
@@ -14,6 +16,22 @@ const VictimTracking = ({ navigation }) => {
     const [heroes, setHeroes] = useState({}); // Track multiple responders
 
     const pulseAnim = useRef(new Animated.Value(0)).current;
+    const mapRef = useRef(null);
+
+useEffect(() => {
+    if (Object.keys(heroes).length > 0 && myLocation) {
+        const coords = Object.values(heroes).map(h => ({
+            latitude: parseFloat(h.latitude),
+            longitude: parseFloat(h.longitude)
+        }));
+        coords.push(myLocation);
+
+        mapRef.current?.fitToCoordinates(coords, {
+            edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+            animated: true,
+        });
+    }
+}, [heroes]);
 
 useEffect(() => {
     Animated.loop(
@@ -35,15 +53,9 @@ useEffect(() => {
 
     useEffect(() => {
         // 1. Connect to Socket
-        socket.current = io('http://192.168.0.103:3000');
+        socket.current = io(BACKEND_URI); // Use WebSocket URI
 
-        // 2. Join private room using my own ID
-        socket.current.emit('join_emergency', {
-  emergencyId: String(user._id),
-  userId: user._id,
-});
-
-        // 3. Listen for Responders moving
+         // 3. Listen for Responders moving
         socket.current.on('responder_moved', (data) => {
              console.log("🧭 Hero update:", data);
             setHeroes(prev => ({
@@ -51,10 +63,19 @@ useEffect(() => {
                 [data.userId]: {
                     latitude: data.latitude,
                     longitude: data.longitude,
-                    name: data.userName
+                    name: data.userName,
+                    phoneNumber: data.phoneNumber
                 }
             }));
         });
+
+        // 2. Join private room using my own ID
+        socket.current.emit('join_emergency', {
+  emergencyId: String(user._id),
+  userId: user._id,
+});
+
+       
 
         // 4. Listen for Emergency Resolution (Help arrived)
         socket.current.on('emergency_resolved', () => {
@@ -160,7 +181,8 @@ const getClosestHeroDistance = () => {
                {/* Approaching Heroes */}
 {Object.values(heroes).map((hero, index) => (
     <Marker
-        key={hero.userId}
+        // key={hero.userId}
+        key={`hero-${hero.userId || hero.socketId || index}`}
         coordinate={{ 
             latitude: parseFloat(hero.latitude), 
             longitude: parseFloat(hero.longitude) 

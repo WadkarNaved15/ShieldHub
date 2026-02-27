@@ -2,9 +2,10 @@ apply plugin: "com.android.application"
 apply plugin: 'com.google.gms.google-services' 
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
-apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.gradle"
+// apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.gradle"
 
 // Add this line
+
 
 
 /**
@@ -86,7 +87,8 @@ android {
     
 
     namespace "com.hershield"
-    def googleMapsApiKey = project.hasProperty("GOOGLE_MAPS_API_KEY") ? project.GOOGLE_MAPS_API_KEY : ""
+    // def googleMapsApiKey = project.hasProperty("GOOGLE_MAPS_API_KEY") ? project.GOOGLE_MAPS_API_KEY : ""
+    def googleMapsApiKey = project.properties["GOOGLE_MAPS_API_KEY"] ?: ""
 
     defaultConfig {
         applicationId "com.hershield"
@@ -95,9 +97,9 @@ android {
         versionCode 1
         versionName "1.0"
         // .env file se key uthayega, agar nahi mili toh empty string
-        def envKey = project.env.get("GOOGLE_MAPS_API_KEY") ?: ""
+        // def envKey = project.env.get("GOOGLE_MAPS_API_KEY") ?: ""
           manifestPlaceholders = [
-    GOOGLE_MAPS_API_KEY: envKey
+    GOOGLE_MAPS_API_KEY: googleMapsApiKey
 ]
     }
     signingConfigs {

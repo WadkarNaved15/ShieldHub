@@ -2,14 +2,15 @@ const React = require('react');
 const { useState,useContext } = React;
 const { View, StyleSheet, Text, TextInput, KeyboardAvoidingView, TouchableOpacity, Alert } = require('react-native');
 const { useNavigation } = require('@react-navigation/native');
-const axios = require("axios").default;  // Fix for CommonJS require
+
 const { saveToken,getToken } = require('../functions/secureStorage');
 const FCMService = require('../services/fcmService');
 const { UserContext } = require('../Context/User');
+import { BACKEND_URI } from '@env';
+import axios from 'axios';
 
-console.log("Frontend", process.env.BACKEND_URI); // Ensure this is set correctly in your environment
 
-console.log("backend", process.env.BACKEND_URI)
+
 const Login = () => {
     const { login } = useContext(UserContext);
     const navigation = useNavigation();
@@ -21,7 +22,7 @@ const Login = () => {
     const handleLogIn = async () => {
         try {
             console.log(phoneNumber,password)
-            const response = await axios.post(`${process.env.BACKEND_URI}/login`, {
+            const response = await axios.post(`${BACKEND_URI}/login`, {
                 phoneNumber,
                 password,
             });
@@ -39,7 +40,7 @@ const Login = () => {
             if (error.response && error.response.status === 400) {
                 Alert.alert('Error', 'Invalid phone number or password');
             } else {
-                Alert.alert('Error', 'Something went wrong, please try again later');
+                Alert.alert('Raw Error', error.message || JSON.stringify(error));
             }
         }
     };
@@ -76,11 +77,14 @@ const Login = () => {
                         {viewPassword ? "Hide Password" : "Show Password"}
                     </Text>
 
+                  
                     <TouchableOpacity style={styles.button} onPress={handleLogIn} activeOpacity={0.8}>
                         <Text style={styles.buttonText}>Log In</Text>
                     </TouchableOpacity>
                 </View>
             </View>
+
+            
 
             <Text style={[styles.option, styles.boldText, styles.forgotPassword]} onPress={() => console.log('Forgot Password?')}>
                 Forgot Password?
@@ -89,6 +93,9 @@ const Login = () => {
                 Don't have an account? <Text style={styles.boldText}>Register</Text>
             </Text>
         </View>
+
+        
+
         </KeyboardAvoidingView>
     );
 };

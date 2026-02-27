@@ -121,6 +121,7 @@ router.put('/update-location', auth, async (req, res) => {
 
     // Save in Redis (Geo index for spatial queries)
     await redis.geoadd('users_location', longitude, latitude, kid._id.toString());
+    console.log("lattitude , longitude",longitude,latitude);
 
     // Save in Mongo (optional, if you want history / last known)
     kid.currentLocation = {

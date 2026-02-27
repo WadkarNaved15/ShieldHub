@@ -7,8 +7,9 @@ import apiCall from '../functions/axios';
 import { UserContext } from '../Context/User';
 import io from 'socket.io-client';
 import { Phone, Navigation as NavIcon, X } from 'lucide-react-native';
-import Config from 'react-native-config';
-
+// import Config from 'react-native-config';
+import { BACKEND_URI } from '@env';
+import{ GOOGLE_MAPS_API_KEY } from '@env';
 const { width, height } = Dimensions.get('window');
 
 
@@ -16,7 +17,7 @@ const { width, height } = Dimensions.get('window');
 const ResponderMap = ({ route, navigation }) => {
    
 
-
+console.log(BACKEND_URI, GOOGLE_MAPS_API_KEY);
     const { victimId,   initialLat, initialLon } = route.params || {};
     const [victimName, setVictimName] = useState('');
 const [victimPhone, setVictimPhone] = useState('');
@@ -42,7 +43,7 @@ if (!initialLat || !initialLon) {
     const [otherResponders, setOtherResponders] = useState({});
     const [routeInfo, setRouteInfo] = useState({ distance: 0, duration: 0 });
 
-    const GOOGLE_MAPS_API_KEY = Config.GOOGLE_MAPS_API_KEY;
+    
 
     useEffect(() => {
   const fetchVictim = async () => {
@@ -63,7 +64,7 @@ if (!initialLat || !initialLon) {
   };
 
   if (victimId) fetchVictim();
-}, [victimId]);
+});
 
 useEffect(() => {
   console.log('👤 Victim name state updated:', victimName);
@@ -72,13 +73,16 @@ useEffect(() => {
     useEffect(() => {
         console.log("🛠️ Joining Room with ID:", victimId);
         // 1. Connect to Socket Server
-        socket.current = io('http://192.168.0.103:3000');
+      socket.current = io(BACKEND_URI, {
+        transports: ['websocket'], 
+        forceNew: true 
+    });
 
         // 2. Join the specific emergency room
         socket.current.emit('join_emergency', {
   emergencyId: String(victimId),
   userId: user._id,
-});
+}, [victimId]);
 
         // 3. Listen for victim movement
         socket.current.on('victim_moved', (data) => {

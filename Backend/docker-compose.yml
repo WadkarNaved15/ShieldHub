@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  ml-engine:
+    build: ./ML
+    container_name: hershield-ml
+    ports:
+      - "5001:5001"
+    restart: always
+    env_file:          # <-- ADD THIS LINE
+      - .env           # <-- ADD THIS LINE
+
+  node-api:
+    build: .
+    container_name: hershield-node
+    ports:
+      - "3000:3000"
+    depends_on:
+      - ml-engine
+    env_file:
+      - .env  
+    environment:
+      
+      - ML_API_URL=http://ml-engine:5001
+    restart: always

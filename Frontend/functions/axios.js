@@ -1,13 +1,15 @@
+// import { BACKEND_URI } from '@env';
 const axios = require('axios').default;
-import { BACKEND_URI } from '@env';
 const { getToken, saveToken } = require('./secureStorage'); 
 
 // Create an Axios instance for API requests
+// console.log("Backend URI in Axios:", BACKEND_URI);
 const axiosInstance = axios.create({
-  baseURL: BACKEND_URI, 
+  baseURL:  'http://13.232.140.218:3000', 
   // baseURL: 'http://192.168.32.234:3000',
   timeout: 10000, 
 });
+
 
 // Function to refresh access token using refresh token
 const refreshAccessToken = async () => {
@@ -38,7 +40,7 @@ const refreshAccessToken = async () => {
 // API call function with parameters for URL, method, headers, and data
 const apiCall = async ({ url, method = 'GET', headers = {}, data = {} }) => {
   try {
-    console.log("Backend URL:", process.env.BACKEND_URI);
+    // console.log("Backend URL:", process.env.BACKEND_URI);
 
     const accessToken = await getToken('accessToken');
     if (!accessToken) {

@@ -21,9 +21,13 @@ const EmergencyNotificationsScreen = require('./Screens/EmergencyNotifications')
 const FeelingUnsafe = require('./Screens/HerShield/FeelingUnsafe');
 const AchievementsScreen = require('./Screens/AchievementsScreen');
 const CrimeReportsScreen = require('./Screens/HerShield/Crime_Reports');
+const SafeRoute = require('./Screens/safeRoute').default
+
+
 // const HerShieldHeroesScreen = require('./Screens/HerShield/HerShieldHeroesScreen');
 // const HelperRoute = require('./Screens/HelperRoute'); 
 const Marketplace = require('./Screens/HerShield/Marketplace');
+
 const Modules = require('./Screens/Modules');
 
 const KidSafeHome = require('./Screens/KidSafe/Home');
@@ -34,7 +38,7 @@ import ParentLink from './Screens/KidSafe/ParentLink';
 import ParentHome from './Screens/KidSafe/ParentHome'
 import Schedule from './Screens/KidSafe/Schedule';
 import GeoFence from './Screens/KidSafe/GeoFence';
-
+import HotspotMap from './Screens/HerShield/HotspotMap';
 import { useNavigation } from '@react-navigation/native';
 import messaging from '@react-native-firebase/messaging';
 import firebase from '@react-native-firebase/app';
@@ -278,6 +282,8 @@ useEffect(() => {
   return (
     <NavigationContainer ref={navigationRef}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
+      
+
         <Stack.Screen name="Logo" component={LogoScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="SignUp" component={SignUpScreen} />
@@ -317,6 +323,9 @@ useEffect(() => {
   }} 
 />
 
+
+<Stack.Screen name="HotspotMap" component={HotspotMap} />
+<Stack.Screen name="SafeRoute" component={SafeRoute} />
 
 
 

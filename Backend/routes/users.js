@@ -8,6 +8,8 @@ const Achievements = require("../model/Achievements");
 const {getUserFromToken} = require("../Functions/userToken");
 
 // router.put("/fcm-token", async (req, res) => {
+
+  
 //   try {
 //      console.log("📩 Received FCM token payload:", req.body);
 //     console.log("🔐 Authorization Header:", req.headers.authorization);
@@ -32,6 +34,7 @@ const {getUserFromToken} = require("../Functions/userToken");
 
 // GET USER BY ID
 router.get('/:id', async (req, res) => {
+   console.log('🧪 users route HIT with ID:', req.params.id);
   try {
     const user = await Users.findById(req.params.id).select(
       'fullName phoneNumber role'

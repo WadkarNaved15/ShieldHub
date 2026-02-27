@@ -160,11 +160,11 @@ const [sosActive, setSosActive] = useState(false);
           </View>
           <Text style={styles.iconText}>Community Feed</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Marketplace')} style={styles.iconContainer}>
+        <TouchableOpacity onPress={() => navigation.navigate('HotspotMap')} style={styles.iconContainer}>
           <View style={[styles.circle, page === 'Marketplace' && styles.activeCircle]}>
             <Image source={imageMap.Marketplace} style={styles.iconImage} />
           </View>
-          <Text style={styles.iconText}>Marketplace</Text>
+          <Text style={styles.iconText}>Hotspots</Text>
         </TouchableOpacity>
       </View>
     </>
