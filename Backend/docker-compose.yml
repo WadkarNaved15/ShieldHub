@@ -1,25 +1,69 @@
+# version: '3.8'
+
+# services:
+#   ml-engine:
+#     build: ./ML
+#     container_name: hershield-ml
+#     ports:
+#       - "5001:5001"
+#     restart: always
+#     env_file:          # <-- ADD THIS LINE
+#       - .env           # <-- ADD THIS LINE
+
+#   node-api:
+#     build: .
+#     container_name: hershield-node
+#     ports:
+#       - "3000:3000"
+#     depends_on:
+#       - ml-engine
+#     env_file:
+#       - .env  
+#     environment:
+      
+#       - ML_API_URL=http://ml-engine:5001
+#     restart: always
+
+
 version: '3.8'
 
 services:
+  caddy:
+    image: caddy:latest
+    container_name: hershield-caddy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - node-api
+
   ml-engine:
     build: ./ML
     container_name: hershield-ml
     ports:
-      - "5001:5001"
+      - "5001:5001" 
     restart: always
-    env_file:          # <-- ADD THIS LINE
-      - .env           # <-- ADD THIS LINE
+    env_file:          
+      - .env           
 
   node-api:
     build: .
     container_name: hershield-node
-    ports:
-      - "3000:3000"
+    # Port 3000 is intentionally unmapped here so it isn't exposed to HTTP.
+    # Caddy will still route to it internally on port 3000.
     depends_on:
       - ml-engine
     env_file:
       - .env  
     environment:
-      
       - ML_API_URL=http://ml-engine:5001
     restart: always
+
+volumes:
+  caddy_data:
+  caddy_config:

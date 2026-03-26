@@ -1,0 +1,3 @@
+hershield.nexie.in {
+    reverse_proxy hershield-node:3000
+}
