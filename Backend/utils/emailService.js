@@ -4,7 +4,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendOtpEmail = async (email, otp) => {
   await resend.emails.send({
-    from: 'HerShield <onboarding@resend.dev>', // use resend's default or your domain
+     from: 'HerShield <otp@hershield.nexie.in>', 
     to: email,
     subject: 'Your OTP Code',
     html: `
