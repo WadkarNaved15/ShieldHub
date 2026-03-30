@@ -1,19 +1,10 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    type: 'OAuth2',
-    user: process.env.EMAIL_USER,           // your Gmail address
-    clientId: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
-  },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendOtpEmail = async (email, otp) => {
-  const mailOptions = {
-    from: `Team HerShield <${process.env.EMAIL_USER}>`,
+  await resend.emails.send({
+    from: 'HerShield <onboarding@resend.dev>', // use resend's default or your domain
     to: email,
     subject: 'Your OTP Code',
     html: `
@@ -22,9 +13,7 @@ const sendOtpEmail = async (email, otp) => {
       <h1 style="letter-spacing: 4px;">${otp}</h1>
       <p>If you didn't request this, please ignore this email.</p>
     `,
-  };
-
-  await transporter.sendMail(mailOptions);
+  });
 };
 
 module.exports = { sendOtpEmail };
