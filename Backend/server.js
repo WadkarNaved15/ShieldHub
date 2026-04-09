@@ -12,6 +12,7 @@ const http = require("http");
 const { processAudio, stopRecognitionStream } = require("./Functions/FeelingUnsafe");
 const auth = require('./middleware/auth'); // Optional if using middleware version
 const hotspotRoutes = require("./routes/Hotspot");
+const { sendOtpEmail } = require('./utils/emailService');
 
 
 
@@ -143,55 +144,91 @@ app.get('/', (req, res) => {
 
 
 
-app.post('/send-otp', async (req, res) => {
-  const { phoneNumber} = req.body;
-  console.log("yfyg",phoneNumber);
-  const sanitizedPhoneNumber = phoneNumber.replace(/\D/g, '');
-  console.log(sanitizedPhoneNumber);
+// app.post('/send-otp', async (req, res) => {
+//   const { phoneNumber} = req.body;
+//   console.log("yfyg",phoneNumber);
+//   const sanitizedPhoneNumber = phoneNumber.replace(/\D/g, '');
+//   console.log(sanitizedPhoneNumber);
 
-  // Validate the phone number
+//   // Validate the phone number
+//   if (!isValidPhoneNumber(sanitizedPhoneNumber, 'IN')) {
+//     return res.status(400).json({ message: 'Invalid phone number' });
+//   }
+
+//   // Check if user already exists
+//   const user = await Users.findOne({ phoneNumber: sanitizedPhoneNumber });
+//   if (user) {
+//     return res.status(400).json({ message: 'User already exists' });
+//   }
+
+//   // Generate OTP and encrypt it
+//   const otp = generateOtp();
+//   const encryptedOtp = encryptOtp(otp); 
+//   const otpCreatedAt = new Date();
+
+//   // Store OTP temporarily
+//   otpStore.set(sanitizedPhoneNumber, { encryptedOtp, otpCreatedAt });
+
+//  console.log(`OTP for ${sanitizedPhoneNumber}: ${otp}`);
+//  await sendOtp(sanitizedPhoneNumber, otp);
+//  res.send({ success: true, message: 'OTP sent successfully' });
+
+// //  client.messages
+// //   .create({
+// //     body: 'Hello from HerShield! Your OTP is ' + otp,
+// //     from: '+17743443713', // Your Twilio number
+// //     to: `+91${sanitizedPhoneNumber}` // Recipient's number
+// //   })
+// //   .then(message => {
+// //     console.log(`OTP sent to ${sanitizedPhoneNumber}: ${otp}, SID: ${message.sid}`);
+// //     return res.send({ success: true, message: 'OTP sent successfully' }); // Return response
+// //   })
+// //   .catch(error => {
+// //     console.error('Error sending message:', error);
+// //     if (!res.headersSent) { // Prevent duplicate response
+// //       return res.status(500).send({ success: false, message: 'Error sending OTP' });
+// //     }
+// //   });
+
+
+
+// });
+
+
+
+app.post('/send-otp', async (req, res) => {
+  const { phoneNumber, email } = req.body; // Accept email from frontend
+
+  // ── Phone validation (your existing logic) ──
+  const sanitizedPhoneNumber = phoneNumber.replace(/\D/g, '');
   if (!isValidPhoneNumber(sanitizedPhoneNumber, 'IN')) {
     return res.status(400).json({ message: 'Invalid phone number' });
   }
 
-  // Check if user already exists
-  const user = await Users.findOne({ phoneNumber: sanitizedPhoneNumber });
+  // ── Check if user already exists ──
+  const user = await Users.findOne({
+    $or: [{ phoneNumber: sanitizedPhoneNumber }, { email }],
+  });
   if (user) {
     return res.status(400).json({ message: 'User already exists' });
   }
 
-  // Generate OTP and encrypt it
+  // ── Generate & encrypt OTP ──
   const otp = generateOtp();
-  const encryptedOtp = encryptOtp(otp); 
+  const encryptedOtp = encryptOtp(otp);
   const otpCreatedAt = new Date();
 
-  // Store OTP temporarily
-  otpStore.set(sanitizedPhoneNumber, { encryptedOtp, otpCreatedAt });
+  // ── Store OTP against both phone and email ──
+  otpStore.set(sanitizedPhoneNumber, { encryptedOtp, otpCreatedAt, email });
 
- console.log(`OTP for ${sanitizedPhoneNumber}: ${otp}`);
- await sendOtp(sanitizedPhoneNumber, otp);
- res.send({ success: true, message: 'OTP sent successfully' });
+  // ── Send via SMS + Email ──
+  // await sendOtp(sanitizedPhoneNumber, otp);   // your existing SMS logic
+  await sendOtpEmail(email, otp);             // new email logic
 
-//  client.messages
-//   .create({
-//     body: 'Hello from HerShield! Your OTP is ' + otp,
-//     from: '+17743443713', // Your Twilio number
-//     to: `+91${sanitizedPhoneNumber}` // Recipient's number
-//   })
-//   .then(message => {
-//     console.log(`OTP sent to ${sanitizedPhoneNumber}: ${otp}, SID: ${message.sid}`);
-//     return res.send({ success: true, message: 'OTP sent successfully' }); // Return response
-//   })
-//   .catch(error => {
-//     console.error('Error sending message:', error);
-//     if (!res.headersSent) { // Prevent duplicate response
-//       return res.status(500).send({ success: false, message: 'Error sending OTP' });
-//     }
-//   });
-
-
-
+  console.log(`OTP for ${sanitizedPhoneNumber} / ${email}: ${otp}`);
+  res.send({ success: true, message: 'OTP sent successfully' });
 });
+
 
 app.post('/verify-otp', async (req, res) => {
   const { phoneNumber, otp} = req.body;
