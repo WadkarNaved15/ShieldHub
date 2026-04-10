@@ -33,7 +33,7 @@ async function scheduleCheckIn(session) {
   const timer = setTimeout(async () => {
     try {
       console.log(`Calling ${session.phone}...`);
-      // await triggerTwilioCall("7738087259");
+      await triggerTwilioCall("7738087259");
 
       session.lastCheckIn = new Date(); // Update last check-in time in memory
       await session.save().catch(err => console.error("Error saving session:", err));

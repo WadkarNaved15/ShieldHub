@@ -1,17 +1,19 @@
 const Twilio = require('twilio');
 require('dotenv').config();
 
-const ngrokUrl= process.env.NGROK_URL;
+const backendUrl= process.env.BACKEND_URL;
 const twilioNumber = process.env.TWILIO_PHONE_NUMBER;
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const client = Twilio(accountSid, authToken);
 
+console.log("Twilio",twilioNumber, accountSid, authToken);
+
 const triggerTwilioCall = async (phone) => {
     try {
       await client.calls
       .create({
-        url: `${ngrokUrl}/twiml-response?lang=en`,  // TwiML URL for the call
+        url: `${backendUrl}/twiml-response?lang=en`,  // TwiML URL for the call
         from: `+${twilioNumber}`,  // Replace with the recipient's phone number
         to:`+91${phone}` // Replace with your Twilio number
       })

@@ -361,51 +361,59 @@ app.all('/twiml-response', (req, res) => {
 
 
 
-app.post('/collect-pin', (req, res) => {
-  console.log(req.body);
-  const pin = req.body.Digits || null;
-  console.log(`User entered PIN: ${pin}`);
+app.post('/collect-pin', async (req, res) => {
+  try {
+    const pin = req.body.Digits || null;
+    console.log("yfyg",req.body);
+    const fromNumber = req.body.From.replace("+91", ""); // normalize number
 
-  if (!pin || pin !== "1234") {
-    io.emit("invalid_pin", { message: message, pin: pin });
-  }
-  // Read `lang` from query (sent in action URL)
-  const language = req.query.lang || 'en';
+    console.log("User entered PIN:", pin);
+    console.log("Caller number:", fromNumber);
 
-  // Confirmation messages
-  const messages = {
-    en: "Your PIN has been received. Thank you!",
-    hi: "आपका पिन प्राप्त हो गया है। धन्यवाद!",
-    ta: "உங்கள் குறியீடு பெற்றுக்கொள்ளப்பட்டது. நன்றி!",
-    te: "మీ పిన్ స్వీకరించబడింది. ధన్యవాదాలు!",
-    bn: "আপনার পিন পাওয়া গেছে। ধন্যবাদ!",
-    mr: "तुमचा पिन प्राप्त झाला आहे. धन्यवाद!"
-  };
+    // Find user by phone number
+    const user = await Users.findOne({ phoneNumber: fromNumber });
 
-  // Twilio Female Voice selection
-  const twilioVoices = {
-    en: { lang: "en-US", voice: "Google.en-US-Wavenet-F" },
-    hi: { lang: "hi-IN", voice: "Google.hi-IN-Wavenet-D" },
-    ta: { lang: "ta-IN", voice: "Google.ta-IN-Wavenet-C" },
-    te: { lang: "te-IN", voice: "Google.te-IN-Wavenet-C" },
-    bn: { lang: "bn-IN", voice: "Google.bn-IN-Wavenet-C" },
-    mr: { lang: "mr-IN", voice: "Google.mr-IN-Wavenet-C" }
-  };
+    if (!user) {
+      console.log("User not found");
+      return res.send(`<Response><Say>User not found</Say></Response>`);
+    }
 
-  const selectedLang = twilioVoices[language] || twilioVoices.en;
-  const message = messages[language] || messages.en;
+    const storedPin = user.secretPin;
 
-  // Handle missing PIN scenario
-  const finalMessage = pin 
-    ? message 
-    :  " Sorry, we did not receive any PIN input.";
+    if (!pin || pin !== storedPin) {
+      console.log("Invalid PIN");
 
-  res.set('Content-Type', 'text/xml; charset=utf-8');
-  res.send(`<?xml version="1.0" encoding="UTF-8"?>
+      io.emit("invalid_pin", { phone: fromNumber, pin });
+
+      return res.send(`
+        <Response>
+          <Say>Invalid PIN. Goodbye.</Say>
+        </Response>
+      `);
+    }
+
+    console.log("PIN verified");
+
+    const language = req.query.lang || 'en';
+
+    const messages = {
+      en: "Your PIN has been verified. Thank you!",
+      hi: "आपका पिन सत्यापित हो गया है। धन्यवाद!",
+      mr: "तुमचा पिन सत्यापित झाला आहे. धन्यवाद!"
+    };
+
+    const message = messages[language] || messages.en;
+
+    res.send(`
       <Response>
-          <Say voice="${selectedLang.voice}" language="${selectedLang.lang}">${finalMessage}</Say>
+        <Say>${message}</Say>
       </Response>
-  `);
+    `);
+
+  } catch (error) {
+    console.error(error);
+    res.send(`<Response><Say>Error occurred</Say></Response>`);
+  }
 });
 
 

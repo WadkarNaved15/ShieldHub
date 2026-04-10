@@ -64,7 +64,7 @@ const initializeSocket = (server) => {
     // --- 1. Audio Processing (Existing) ---
     const { processAudio } = require("../Functions/FeelingUnsafe");
     socket.on("audio_data", (audioData) => {
-      processAudio(socket, audioData);
+      // processAudio(socket, audioData);
     });
 
     // --- 2. Emergency Room Logic (New) ---
