@@ -266,7 +266,7 @@ app.post('/verify-otp', async (req, res) => {
 
   // register of new user
   app.post('/register', async (req, res) => {
-    const { fullName, phoneNumber, password, gender, age , role } = req.body;
+    const { fullName, phoneNumber, password, gender, age , role , secretPin,emergencyPhrase} = req.body;
 
     // Validate input
     if (!fullName || !phoneNumber || !password || !gender || !age || !role) {
@@ -292,6 +292,8 @@ app.post('/verify-otp', async (req, res) => {
             gender,
             age,
             role,
+            secretPin,
+            emergencyPhrase
         });
 
         await newUser.save();

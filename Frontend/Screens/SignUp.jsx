@@ -96,6 +96,21 @@ const SignUp = () => {
                 return;
             }
         }
+
+
+        if (gender === 'Female') {
+        // Navigate to the next screen and pass all the currently collected data as route parameters
+        navigation.navigate('SecuritySetup', {
+            fullName,
+            phoneNumber,
+            email,
+            password,
+            gender,
+            age,
+            role,
+        });
+        return; // Stop execution here so the API call doesn't fire yet
+    }
     
         try {
             const response = await axios.post(`${BACKEND_URI}/register`, {
