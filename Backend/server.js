@@ -90,7 +90,7 @@ mongoose.connect(process.env.MONGO_URI,{
     });
   });
 
-const ngrokUrl= process.env.NGROK_URL;
+const ngrokUrl= process.env.BACKEND_URL;
 const otpStore = new Map();
 
 
