@@ -378,19 +378,19 @@ app.post('/collect-pin', async (req, res) => {
       return res.send(`<Response><Say>User not found</Say></Response>`);
     }
 
-const isValidPin = await bcrypt.compare(pin, user.pin);
+    const storedPin = user.secretPin;
 
-if (!pin || !isValidPin) {
-  console.log("Invalid PIN");
+    if (!pin || pin !== storedPin) {
+      console.log("Invalid PIN");
 
-  io.emit("invalid_pin", { phone: userNumber, pin });
+      io.emit("invalid_pin", { phone: userNumber, pin });
 
-  return res.send(`
-    <Response>
-      <Say>Invalid PIN. Goodbye.</Say>
-    </Response>
-  `);
-}
+      return res.send(`
+        <Response> 
+          <Say>Invalid PIN. Goodbye.</Say>
+        </Response>
+      `);
+    }
 
     console.log("PIN verified");
 
