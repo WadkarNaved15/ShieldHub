@@ -365,32 +365,32 @@ app.post('/collect-pin', async (req, res) => {
   try {
     const pin = req.body.Digits || null;
     console.log("yfyg",req.body);
-    const fromNumber = req.body.From.replace("+91", ""); // normalize number
+    const userNumber = req.body.To.replace("+91", "");// normalize number
 
     console.log("User entered PIN:", pin);
-    console.log("Caller number:", fromNumber);
+    console.log("Caller number:", userNumber);
 
     // Find user by phone number
-    const user = await Users.findOne({ phoneNumber: fromNumber });
+    const user = await Users.findOne({ phoneNumber: userNumber });
 
     if (!user) {
       console.log("User not found");
       return res.send(`<Response><Say>User not found</Say></Response>`);
     }
 
-    const storedPin = user.secretPin;
+const isValidPin = await bcrypt.compare(pin, user.pin);
 
-    if (!pin || pin !== storedPin) {
-      console.log("Invalid PIN");
+if (!pin || !isValidPin) {
+  console.log("Invalid PIN");
 
-      io.emit("invalid_pin", { phone: fromNumber, pin });
+  io.emit("invalid_pin", { phone: userNumber, pin });
 
-      return res.send(`
-        <Response>
-          <Say>Invalid PIN. Goodbye.</Say>
-        </Response>
-      `);
-    }
+  return res.send(`
+    <Response>
+      <Say>Invalid PIN. Goodbye.</Say>
+    </Response>
+  `);
+}
 
     console.log("PIN verified");
 
