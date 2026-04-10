@@ -283,6 +283,8 @@ app.post('/verify-otp', async (req, res) => {
         // Hash the password using bcryptjs
         const salt = await bcrypt.genSalt(10); // Generate salt
         const hashedPassword = await bcrypt.hash(password, salt); // Hash the password
+        
+        const hashedPin = await bcrypt.hash(secretPin,10)
 
         // Create and save the new user
         const newUser = new Users({
@@ -292,7 +294,7 @@ app.post('/verify-otp', async (req, res) => {
             gender,
             age,
             role,
-            secretPin,
+            pin : hashedPin,
             emergencyPhrase
         });
 
