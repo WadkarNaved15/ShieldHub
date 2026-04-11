@@ -2,10 +2,11 @@
 const axios = require('axios').default;
 const { getToken, saveToken } = require('./secureStorage'); 
 
+
 // Create an Axios instance for API requests
 // console.log("Backend URI in Axios:", BACKEND_URI);
 const axiosInstance = axios.create({
-  baseURL:  'http://13.232.140.218:3000', 
+  baseURL:  'https://hershield.nexie.in', // Replace with your backend URL
   // baseURL: 'http://192.168.32.234:3000',
   timeout: 10000, 
 });

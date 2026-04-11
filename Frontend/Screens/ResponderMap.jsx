@@ -64,7 +64,7 @@ if (!initialLat || !initialLon) {
   };
 
   if (victimId) fetchVictim();
-});
+}, [victimId]);
 
 useEffect(() => {
   console.log('👤 Victim name state updated:', victimName);

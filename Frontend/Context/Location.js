@@ -372,6 +372,7 @@ const apiCall = require('../functions/axios');
 const LocationContext = createContext();
 
 const LocationProvider = ({children}) => {
+  const isFetchingLocation = useRef(false);
   const [location, setLocation] = useState(null);
   const [hasPermission, setHasPermission] = useState(false);
   const lastLocationRef = useRef(null); // Pichli location save karne ke liye
@@ -430,10 +431,18 @@ const LocationProvider = ({children}) => {
     if (watchId.current) return;
 
     watchId.current = setInterval(async () => {
+      // 1. If we are already waiting for a GPS lock, skip this 5-second tick entirely
+      if (isFetchingLocation.current) {
+        return; 
+      }
+
+      // 2. Lock it down
+      isFetchingLocation.current = true;
+
       try {
         const newLoc = await GetLocation.getCurrentPosition({
           enableHighAccuracy: true,
-          timeout: 10000,
+          timeout: 10000, // Wait up to 10 seconds for a lock
         });
 
         let shouldUpdate = false;
@@ -461,9 +470,13 @@ const LocationProvider = ({children}) => {
           updateRedisLocation(newLoc);
         }
       } catch (err) {
-        console.log("Tracking Error:", err.message);
+        // If the error is a timeout, it just means the GPS is slow, it will try again next tick
+        console.log("Tracking Error:", err.code, err.message);
+      } finally {
+        // 3. ALWAYS unlock it when finished, whether it succeeded or failed
+        isFetchingLocation.current = false;
       }
-    }, 5000); // Check har 5 sec mein hoga, lekin API tabhi chalegi jab movement ho
+    }, 5000); 
   }
 
 

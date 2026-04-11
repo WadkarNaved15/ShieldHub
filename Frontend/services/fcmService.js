@@ -7,6 +7,7 @@ const { saveToken, getToken } = require('../functions/secureStorage');
 const apiCall = require('../functions/axios');
 const navigationService = require('./navigationService'); 
 
+
 let listenersInitialized = false;
 
 // const BACKEND_URI =  process.env.BACKEND_URI;  // Update with your backend
@@ -72,50 +73,39 @@ const FCMService = {
     },
 
 
-//     async getFCMToken() {
-//         try {
-//             const newToken = await messaging().getToken();
-//             const storedToken = await getToken('fcmToken');
-    
-//             console.log("New FCM Token:", newToken);
-//             console.log("Stored FCM Token:", storedToken);
-    
-//             if (!storedToken || storedToken !== newToken) {
-//                 console.log("🔄 Updating FCM Token...");
-//                 await saveToken('fcmToken', newToken);
-//                 // await apiCall({ url: `${BACKEND_URI}/users/fcm-token`, method: 'PUT', data: { fcm_token: newToken } });
-//                 await apiCall({ url: '/users/fcm-token', method: 'PUT', data: { fcm_token: newToken } });
-// console.log("📥 Backend response for FCM save:", response);
-//             } else {
-//                 console.log("FCM Token unchanged, no update needed.");
-//             }
-//         } catch (error) {
-//             console.error("Error getting FCM token:", error);
-//         }
-//     },
-
 
 async getFCMToken() {
-  try {
-    const newToken = await messaging().getToken();
-    const storedToken = await getToken('fcmToken');
+    try {
+      const newToken = await messaging().getToken();
+      const storedToken = await getToken('fcmToken');
 
-    console.log("New FCM Token:", newToken);
-    console.log("Stored FCM Token:", storedToken);
+      // OPTIMAL: Only sync if token is actually new
+      if (newToken !== storedToken) {
+        console.log("🔄 New token detected. Syncing with backend...");
+        const response = await apiCall({
+          url: '/users/fcm-token',
+          method: 'PUT',
+          data: { fcm_token: newToken },
+        });
 
-    await saveToken('fcmToken', newToken); // save locally anyway
+        if (response.success) {
+          await saveToken('fcmToken', newToken);
+          console.log("✅ Token synced successfully");
+        }
+      } else {
+        console.log("✅ Token is already synced.");
+      }
+    } catch (error) {
+      console.error("Error syncing FCM token:", error);
+    }
+  },
 
-    console.log("🔄 Sending FCM token to backend...");
-    const response = await apiCall({
-      url: '/users/fcm-token',
-      method: 'PUT',
-      data: { fcm_token: newToken },
+  // Call this in useEffect to handle automatic token rotations
+  setupTokenRefresh() {
+    return messaging().onTokenRefresh(token => {
+      this.getFCMToken(); 
     });
-    console.log("📥 Backend response:", response);
-  } catch (error) {
-    console.error("Error syncing FCM token:", error);
-  }
-},
+  },
 
 
 

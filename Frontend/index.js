@@ -10,10 +10,20 @@ import notifee, { AndroidImportance, AndroidVisibility, EventType } from '@notif
 notifee.onBackgroundEvent(async ({ type, detail }) => {
   const { notification, pressAction } = detail;
 
-  if (type === EventType.PRESS) {
-    console.log('User pressed the notification', notification);
-    // You can add logic here to navigate to a specific screen
+  if (type === EventType.PRESS || (type === EventType.ACTION_PRESS && pressAction.id === 'accept_mission')) {
+    const data = notification?.data;
+    if (data?.victimId) {
+      // Small delay to let the app bridge initialize
+      setTimeout(() => {
+        navigationService.navigate('ResponderMap', {
+          victimId: data.victimId,
+          initialLat: Number(data.latitude),
+          initialLon: Number(data.longitude),
+        });
+      }, 1000);
+    }
   }
+  
 });
 
 // ✅ MUST be outside App
@@ -46,6 +56,7 @@ notifee.onBackgroundEvent(async ({ type, detail }) => {
 messaging().setBackgroundMessageHandler(async remoteMessage => {
   try {
     // ONLY extract what you need
+    
     const t = remoteMessage.data?.title || "SOS Alert";
     const b = remoteMessage.data?.body || "Help needed!";
 

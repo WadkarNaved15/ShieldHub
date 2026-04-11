@@ -2,8 +2,13 @@
 # 🌍 UNIVERSAL .GITIGNORE
 # ============================
 
+
 # macOS
 .DS_Store
+hershield-key.pem
+
+
+*.pem
 hershield-key.pem
 
 # ============================

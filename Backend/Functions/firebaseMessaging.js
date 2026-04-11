@@ -210,47 +210,55 @@ if (!admin.apps.length) {
 
 const sendFCMNotification = async (tokens, victimId, location) => {
   try {
-    // 1. Ensure tokens is a clean array of strings
     const registrationTokens = tokens.filter(t => typeof t === 'string' && t.length > 0);
-
     if (registrationTokens.length === 0) return;
 
-    // 2. The message object for sendEachForMulticast
     const message = {
-      tokens: registrationTokens, // MUST be called 'tokens'
+      tokens: registrationTokens,
       notification: {
         title: "🚨 Emergency SOS Alert 🚨",
         body: "A user near you needs help! Tap for details.",
       },
       data: {
-        title: "🚨 Emergency SOS Alert 🚨",
-        body: "A user near you needs help! Tap for details.",
         victimId: String(victimId),
         latitude: String(location.latitude),
         longitude: String(location.longitude),
+        screen: 'ResponderMap', // Helps frontend routing
       },
       android: {
         priority: "high",
         notification: {
           channelId: "shieldhub-alerts",
-          sound: "default",
+          sound: "siren", // Matches your Notifee config
         },
       },
     };
 
-    // 3. Send the message
     const response = await admin.messaging().sendEachForMulticast(message);
-
     console.log(`📊 Success: ${response.successCount}, Failed: ${response.failureCount}`);
 
+    // OPTIMAL: Automatic Cleanup of Dead Tokens
     if (response.failureCount > 0) {
+      const deadTokens = [];
       response.responses.forEach((resp, idx) => {
         if (!resp.success) {
-          console.error(`❌ Error for token ${registrationTokens[idx]}:`, resp.error.message);
+          const error = resp.error.code;
+          if (error === 'messaging/registration-token-not-registered' || 
+              error === 'messaging/invalid-registration-token') {
+            deadTokens.push(registrationTokens[idx]);
+          }
         }
       });
-    }
 
+      if (deadTokens.length > 0) {
+        // Purge dead tokens from MongoDB
+        await Users.updateMany(
+          { fcmToken: { $in: deadTokens } },
+          { $set: { fcmToken: null } }
+        );
+        console.log(`🧹 Cleaned ${deadTokens.length} dead tokens from DB.`);
+      }
+    }
     return response;
   } catch (error) {
     console.error("❌ FCM SEND ERROR:", error);

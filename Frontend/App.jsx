@@ -193,6 +193,7 @@ function AppContent() {
 
 
 useEffect(() => {
+  let tokenRefreshUnsubscribe = null;
   const initializeAppMessaging = async () => {
     try {
       // 1. Always ensure the channel exists on boot
@@ -212,6 +213,14 @@ useEffect(() => {
         await FCMService.requestPermission();
         await FCMService.getFCMToken();
         await FCMService.listenForNotifications();
+
+
+        // 2. Setup the refresh listener (The line you asked about)
+        // This returns the unsubscribe function
+        tokenRefreshUnsubscribe = FCMService.setupTokenRefresh();
+        
+        console.log("🚀 FCM Services and Token Refresh Listener active");
+        
       }
     } catch (error) {
       console.error("❌ App Messaging Init Error:", error);
@@ -219,6 +228,15 @@ useEffect(() => {
   };
 
   initializeAppMessaging();
+
+  // CLEANUP: This is crucial to prevent memory leaks
+  return () => {
+    if (tokenRefreshUnsubscribe) {
+      console.log("🧹 Cleaning up FCM Token Refresh listener");
+      tokenRefreshUnsubscribe();
+    }
+  };
+
 }, [isAuthenticated, loading]);
 
 

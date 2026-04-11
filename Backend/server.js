@@ -12,6 +12,8 @@ const http = require("http");
 const { processAudio, stopRecognitionStream } = require("./Functions/FeelingUnsafe");
 const auth = require('./middleware/auth'); // Optional if using middleware version
 const hotspotRoutes = require("./routes/Hotspot");
+const dns = require('dns');
+dns.setServers(['8.8.8.8', '1.1.1.1']);
 
 
 
@@ -73,7 +75,8 @@ app.use("/hotspots", hotspotRoutes);
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI,{
   serverSelectionTimeoutMS: 5000, // Increase timeout
-  socketTimeoutMS: 45000,    
+  socketTimeoutMS: 45000,
+  family: 4, // Use IPv4    
 })
   .then(() => console.log('MongoDB connected successfully'))
   .catch((err) => console.error('MongoDB connection error:', err));
