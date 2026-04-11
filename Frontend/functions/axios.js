@@ -1,13 +1,11 @@
-// import { BACKEND_URI } from '@env';
-const axios = require('axios').default;
-const { getToken, saveToken } = require('./secureStorage'); 
-
+import { BACKEND_URI } from '@env';
+import axios from 'axios';
+import { getToken, saveToken } from './secureStorage';
 
 // Create an Axios instance for API requests
-// console.log("Backend URI in Axios:", BACKEND_URI);
+console.log("Backend URI in Axios:", BACKEND_URI);
 const axiosInstance = axios.create({
-  baseURL:  'https://hershield.nexie.in', // Replace with your backend URL
-  // baseURL: 'http://192.168.32.234:3000',
+  baseURL: BACKEND_URI,
   timeout: 10000, 
 });
 

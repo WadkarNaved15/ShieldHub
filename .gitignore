@@ -65,6 +65,7 @@ Frontend/android/*.keystore
 Frontend/android/captures/
 Frontend/android/app/release/*.keystore
 Frontend/android/app/debug.keystore.lock
+/Users/dlrc-09/Documents/Zaman/ShieldHub/Frontend/android/app/src/main/AndroidManifest.xml
 
 
 # Firebase configuration

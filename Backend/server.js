@@ -12,8 +12,7 @@ const http = require("http");
 const { processAudio, stopRecognitionStream } = require("./Functions/FeelingUnsafe");
 const auth = require('./middleware/auth'); // Optional if using middleware version
 const hotspotRoutes = require("./routes/Hotspot");
-const dns = require('dns');
-dns.setServers(['8.8.8.8', '1.1.1.1']);
+const { sendOtpEmail } = require('./utils/emailService');
 
 
 
@@ -75,8 +74,7 @@ app.use("/hotspots", hotspotRoutes);
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI,{
   serverSelectionTimeoutMS: 5000, // Increase timeout
-  socketTimeoutMS: 45000,
-  family: 4, // Use IPv4    
+  socketTimeoutMS: 45000,    
 })
   .then(() => console.log('MongoDB connected successfully'))
   .catch((err) => console.error('MongoDB connection error:', err));
@@ -92,7 +90,7 @@ mongoose.connect(process.env.MONGO_URI,{
     });
   });
 
-const ngrokUrl= process.env.NGROK_URL;
+const ngrokUrl= process.env.BACKEND_URL;
 const otpStore = new Map();
 
 
@@ -146,55 +144,91 @@ app.get('/', (req, res) => {
 
 
 
-app.post('/send-otp', async (req, res) => {
-  const { phoneNumber} = req.body;
-  console.log("yfyg",phoneNumber);
-  const sanitizedPhoneNumber = phoneNumber.replace(/\D/g, '');
-  console.log(sanitizedPhoneNumber);
+// app.post('/send-otp', async (req, res) => {
+//   const { phoneNumber} = req.body;
+//   console.log("yfyg",phoneNumber);
+//   const sanitizedPhoneNumber = phoneNumber.replace(/\D/g, '');
+//   console.log(sanitizedPhoneNumber);
 
-  // Validate the phone number
+//   // Validate the phone number
+//   if (!isValidPhoneNumber(sanitizedPhoneNumber, 'IN')) {
+//     return res.status(400).json({ message: 'Invalid phone number' });
+//   }
+
+//   // Check if user already exists
+//   const user = await Users.findOne({ phoneNumber: sanitizedPhoneNumber });
+//   if (user) {
+//     return res.status(400).json({ message: 'User already exists' });
+//   }
+
+//   // Generate OTP and encrypt it
+//   const otp = generateOtp();
+//   const encryptedOtp = encryptOtp(otp); 
+//   const otpCreatedAt = new Date();
+
+//   // Store OTP temporarily
+//   otpStore.set(sanitizedPhoneNumber, { encryptedOtp, otpCreatedAt });
+
+//  console.log(`OTP for ${sanitizedPhoneNumber}: ${otp}`);
+//  await sendOtp(sanitizedPhoneNumber, otp);
+//  res.send({ success: true, message: 'OTP sent successfully' });
+
+// //  client.messages
+// //   .create({
+// //     body: 'Hello from HerShield! Your OTP is ' + otp,
+// //     from: '+17743443713', // Your Twilio number
+// //     to: `+91${sanitizedPhoneNumber}` // Recipient's number
+// //   })
+// //   .then(message => {
+// //     console.log(`OTP sent to ${sanitizedPhoneNumber}: ${otp}, SID: ${message.sid}`);
+// //     return res.send({ success: true, message: 'OTP sent successfully' }); // Return response
+// //   })
+// //   .catch(error => {
+// //     console.error('Error sending message:', error);
+// //     if (!res.headersSent) { // Prevent duplicate response
+// //       return res.status(500).send({ success: false, message: 'Error sending OTP' });
+// //     }
+// //   });
+
+
+
+// });
+
+
+
+app.post('/send-otp', async (req, res) => {
+  const { phoneNumber, email } = req.body; // Accept email from frontend
+
+  // ── Phone validation (your existing logic) ──
+  const sanitizedPhoneNumber = phoneNumber.replace(/\D/g, '');
   if (!isValidPhoneNumber(sanitizedPhoneNumber, 'IN')) {
     return res.status(400).json({ message: 'Invalid phone number' });
   }
 
-  // Check if user already exists
-  const user = await Users.findOne({ phoneNumber: sanitizedPhoneNumber });
+  // ── Check if user already exists ──
+  const user = await Users.findOne({
+    $or: [{ phoneNumber: sanitizedPhoneNumber }, { email }],
+  });
   if (user) {
     return res.status(400).json({ message: 'User already exists' });
   }
 
-  // Generate OTP and encrypt it
+  // ── Generate & encrypt OTP ──
   const otp = generateOtp();
-  const encryptedOtp = encryptOtp(otp); 
+  const encryptedOtp = encryptOtp(otp);
   const otpCreatedAt = new Date();
 
-  // Store OTP temporarily
-  otpStore.set(sanitizedPhoneNumber, { encryptedOtp, otpCreatedAt });
+  // ── Store OTP against both phone and email ──
+  otpStore.set(sanitizedPhoneNumber, { encryptedOtp, otpCreatedAt, email });
 
- console.log(`OTP for ${sanitizedPhoneNumber}: ${otp}`);
- await sendOtp(sanitizedPhoneNumber, otp);
- res.send({ success: true, message: 'OTP sent successfully' });
+  // ── Send via SMS + Email ──
+  // await sendOtp(sanitizedPhoneNumber, otp);   // your existing SMS logic
+  await sendOtpEmail(email, otp);             // new email logic
 
-//  client.messages
-//   .create({
-//     body: 'Hello from HerShield! Your OTP is ' + otp,
-//     from: '+17743443713', // Your Twilio number
-//     to: `+91${sanitizedPhoneNumber}` // Recipient's number
-//   })
-//   .then(message => {
-//     console.log(`OTP sent to ${sanitizedPhoneNumber}: ${otp}, SID: ${message.sid}`);
-//     return res.send({ success: true, message: 'OTP sent successfully' }); // Return response
-//   })
-//   .catch(error => {
-//     console.error('Error sending message:', error);
-//     if (!res.headersSent) { // Prevent duplicate response
-//       return res.status(500).send({ success: false, message: 'Error sending OTP' });
-//     }
-//   });
-
-
-
+  console.log(`OTP for ${sanitizedPhoneNumber} / ${email}: ${otp}`);
+  res.send({ success: true, message: 'OTP sent successfully' });
 });
+
 
 app.post('/verify-otp', async (req, res) => {
   const { phoneNumber, otp} = req.body;
@@ -232,7 +266,7 @@ app.post('/verify-otp', async (req, res) => {
 
   // register of new user
   app.post('/register', async (req, res) => {
-    const { fullName, phoneNumber, password, gender, age , role } = req.body;
+    const { fullName, phoneNumber, password, gender, age , role , secretPin,emergencyPhrase} = req.body;
 
     // Validate input
     if (!fullName || !phoneNumber || !password || !gender || !age || !role) {
@@ -258,6 +292,8 @@ app.post('/verify-otp', async (req, res) => {
             gender,
             age,
             role,
+            secretPin,
+            emergencyPhrase
         });
 
         await newUser.save();
@@ -325,51 +361,59 @@ app.all('/twiml-response', (req, res) => {
 
 
 
-app.post('/collect-pin', (req, res) => {
-  console.log(req.body);
-  const pin = req.body.Digits || null;
-  console.log(`User entered PIN: ${pin}`);
+app.post('/collect-pin', async (req, res) => {
+  try {
+    const pin = req.body.Digits || null;
+    console.log("yfyg",req.body);
+    const userNumber = req.body.To.replace("+91", "");// normalize number
 
-  if (!pin || pin !== "1234") {
-    io.emit("invalid_pin", { message: message, pin: pin });
-  }
-  // Read `lang` from query (sent in action URL)
-  const language = req.query.lang || 'en';
+    console.log("User entered PIN:", pin);
+    console.log("Caller number:", userNumber);
 
-  // Confirmation messages
-  const messages = {
-    en: "Your PIN has been received. Thank you!",
-    hi: "आपका पिन प्राप्त हो गया है। धन्यवाद!",
-    ta: "உங்கள் குறியீடு பெற்றுக்கொள்ளப்பட்டது. நன்றி!",
-    te: "మీ పిన్ స్వీకరించబడింది. ధన్యవాదాలు!",
-    bn: "আপনার পিন পাওয়া গেছে। ধন্যবাদ!",
-    mr: "तुमचा पिन प्राप्त झाला आहे. धन्यवाद!"
-  };
+    // Find user by phone number
+    const user = await Users.findOne({ phoneNumber: userNumber });
 
-  // Twilio Female Voice selection
-  const twilioVoices = {
-    en: { lang: "en-US", voice: "Google.en-US-Wavenet-F" },
-    hi: { lang: "hi-IN", voice: "Google.hi-IN-Wavenet-D" },
-    ta: { lang: "ta-IN", voice: "Google.ta-IN-Wavenet-C" },
-    te: { lang: "te-IN", voice: "Google.te-IN-Wavenet-C" },
-    bn: { lang: "bn-IN", voice: "Google.bn-IN-Wavenet-C" },
-    mr: { lang: "mr-IN", voice: "Google.mr-IN-Wavenet-C" }
-  };
+    if (!user) {
+      console.log("User not found");
+      return res.send(`<Response><Say>User not found</Say></Response>`);
+    }
 
-  const selectedLang = twilioVoices[language] || twilioVoices.en;
-  const message = messages[language] || messages.en;
+    const storedPin = user.secretPin;
 
-  // Handle missing PIN scenario
-  const finalMessage = pin 
-    ? message 
-    :  " Sorry, we did not receive any PIN input.";
+    if (!pin || pin !== storedPin) {
+      console.log("Invalid PIN");
 
-  res.set('Content-Type', 'text/xml; charset=utf-8');
-  res.send(`<?xml version="1.0" encoding="UTF-8"?>
+      io.emit("invalid_pin", { phone: userNumber, pin });
+
+      return res.send(`
+        <Response> 
+          <Say>Invalid PIN. Goodbye.</Say>
+        </Response>
+      `);
+    }
+
+    console.log("PIN verified");
+
+    const language = req.query.lang || 'en';
+
+    const messages = {
+      en: "Your PIN has been verified. Thank you!",
+      hi: "आपका पिन सत्यापित हो गया है। धन्यवाद!",
+      mr: "तुमचा पिन सत्यापित झाला आहे. धन्यवाद!"
+    };
+
+    const message = messages[language] || messages.en;
+
+    res.send(`
       <Response>
-          <Say voice="${selectedLang.voice}" language="${selectedLang.lang}">${finalMessage}</Say>
+        <Say>${message}</Say>
       </Response>
-  `);
+    `);
+
+  } catch (error) {
+    console.error(error);
+    res.send(`<Response><Say>Error occurred</Say></Response>`);
+  }
 });
 
 

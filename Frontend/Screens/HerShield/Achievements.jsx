@@ -9,6 +9,7 @@ const Footer = require('../../Components/Footer')
 const axios = require('axios').default;
 const defaultMaleImage = require('../..//assets/male.png');
 const defaultFemaleImage = require('../../assets/female.png');
+import { BACKEND_URI } from '@env';
 
 
 
@@ -46,7 +47,7 @@ function Achievements ({ navigation ,route}) {
     }
   
     try {
-      const response = await axios.get(`${BackendUri}/users/achievements/${user._id}`);
+      const response = await axios.get(`${BACKEND_URI}/users/achievements/${user._id}`);
       console.log("response",response.data.data)
       const newAchievements = response.data.data.map(achievement => achievement.achievementId);
       console.log("achievements",newAchievements)
@@ -189,7 +190,7 @@ const AchievementCard = ({ title, description,img }) => {
       <View style={styles.cardContainer}>
         <Animated.View style={[styles.achievementCard, { transform: [{ rotateY: frontInterpolate }], opacity: frontOpacity }]}>
           <View style={styles.trophyContainer}>
-            <Image source={{ uri: `${BackendUri}/${img.replace(/\\/g, '/')}`  || require('../../assets/trophy.png')}}  style={styles.trophyImage} />
+            <Image source={{ uri: `${BACKEND_URI}/${img.replace(/\\/g, '/')}`  || require('../../assets/trophy.png')}}  style={styles.trophyImage} />
           </View>
           <Text style={styles.achievementTitle}>{title}</Text>
         </Animated.View>

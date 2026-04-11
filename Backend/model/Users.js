@@ -32,6 +32,17 @@ const userSchema = new mongoose.Schema({
   default: null,
 },
 
+  secretPin: {
+            type: String,
+            
+        },
+
+        emergencyPhrase: {
+            type: String,
+            
+            trim: true,
+        },
+
 
   // aadharNumber: {
   //   type: String,

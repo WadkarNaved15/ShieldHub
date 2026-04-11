@@ -12,6 +12,7 @@ const SignUp = () => {
     const [fullName, setFullName] = useState('');
     const [otp, setOtp] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
+    const [email, setEmail] = useState('');           // ── NEW
     const [password, setPassword] = useState('');
     const [gender, setGender] = useState('');
     const [age, setAge] = useState('');
@@ -26,11 +27,15 @@ const SignUp = () => {
             Alert.alert('Error', 'Please enter your phone number');
             return;
         }
+        if (email === '') {                           // ── NEW: validate email before sending OTP
+            Alert.alert('Error', 'Please enter your email address');
+            return;
+        }
         try {
-            const response = await axios.post(`${BACKEND_URI}/send-otp`, { phoneNumber });
+            const response = await axios.post(`${BACKEND_URI}/send-otp`, { phoneNumber, email }); // ── NEW: send email
             if (response.status === 200) {
                 setShowOtpInput(true);
-                Alert.alert('Success', 'OTP sent to your phone number');
+                Alert.alert('Success', 'OTP sent to your phone number and email');
             }
         } catch (error) {
             console.log(error);
@@ -41,13 +46,13 @@ const SignUp = () => {
             }
         }
     };
+
     const handleVerifyOtp = async () => {
         if (otp.length !== 6) {
             Alert.alert('Error', 'Please enter a 6-digit OTP');
             return;
         }
         try {
-            console.log("otp",otp)
             const response = await axios.post(`${BACKEND_URI}/verify-otp`, { phoneNumber, otp });
             if (response.status === 200) {
                 setOtpVerified(true);
@@ -62,14 +67,15 @@ const SignUp = () => {
             }
         }
     };
+
     useEffect(() => {
-        // Check if all required fields are filled and OTP is verified
-        if (fullName && phoneNumber && password && gender && age && otpVerified) {
-            setDisabled(false); // Enable the button
+        // ── NEW: added email to the validation check
+        if (fullName && phoneNumber && email && password && gender && age && otpVerified) {
+            setDisabled(false);
         } else {
-            setDisabled(true); // Disable the button
+            setDisabled(true);
         }
-    }, [fullName, phoneNumber, password, gender, age, otpVerified]);
+    }, [fullName, phoneNumber, email, password, gender, age, otpVerified]);
     
 
     useEffect(() => {
@@ -77,63 +83,40 @@ const SignUp = () => {
             handleVerifyOtp(otp);
         }
     }, [otp]);
-    // const handleSignup = async() => {
-    //     if(fullName === '' || phoneNumber === '' || password === '' || gender === '' || age === '') {
-    //         alert('Please fill all the fields');
-    //         return;
-    //     } else if(gender === 'Male' && age < 18) {
-    //         alert('You are not eligible for this service');
-    //         return;
-    //     } else if(gender === 'Female' && age < 15) {
-    //         alert('You are not eligible for this service');
-    //         return;
-    //     }
 
-    //     try {
-    //         const response = await axios.post(`${BACKEND_URI}/register`, {
-    //             phoneNumber,
-    //             fullName,
-    //             age,
-    //             gender,
-    //           });
-    //       if (response.status === 200) {
-    //         navigation.navigate('PhoneOtp');
-    //       }
-    //     } catch (error) {
-    //       console.log(error);
-    //       if (error.response && error.response.status === 400 && error.response.data.message) {
-    //         Alert.alert('Error', error.response.data.message);
-    //       } else {
-    //         Alert.alert('Error', 'Something went wrong, please try again later');
-    //       }
-    //     }
-    // };
     const handleSignup = async () => {
-        if (fullName === '' || phoneNumber === '' || password === '' || gender === '' || age === '' || !otpVerified) {
-            Alert.alert('Error', 'Please fill all the fields and verify OTP');
+        if (fullName === '' || phoneNumber === '' || email === '' || password === '' || gender === '' || age === '' || !otpVerified) {
+            Alert.alert('Error', 'Please fill all the fields and verify OTP'); // ── NEW: email in check
             return;
         }
 
-
         if ((role === 'hershield' || role === 'senior')) {
-  if ((gender === 'Male' && age < 18) || (gender === 'Female' && age < 15)) {
-    return res.status(400).json({ message: 'You are not eligible for this role based on your age and gender.' });
-  }
-}
+            if ((gender === 'Male' && age < 18) || (gender === 'Female' && age < 15)) {
+                Alert.alert('Error', 'You are not eligible for this role based on your age and gender.');
+                return;
+            }
+        }
 
-    
-        // if (gender === 'Male' && age < 18) {
-        //     Alert.alert('Error', 'You are not eligible for this service');
-        //     return;
-        // } else if (gender === 'Female' && age < 15) {
-        //     Alert.alert('Error', 'You are not eligible for this service');
-        //     return;
-        // }
+
+        if (gender === 'Female') {
+        // Navigate to the next screen and pass all the currently collected data as route parameters
+        navigation.navigate('SecuritySetup', {
+            fullName,
+            phoneNumber,
+            email,
+            password,
+            gender,
+            age,
+            role,
+        });
+        return; // Stop execution here so the API call doesn't fire yet
+    }
     
         try {
             const response = await axios.post(`${BACKEND_URI}/register`, {
                 fullName,
                 phoneNumber,
+                email,           // ── NEW: pass email to register
                 password,
                 gender,
                 age,
@@ -142,7 +125,7 @@ const SignUp = () => {
     
             if (response.status === 200) {
                 Alert.alert('Success', 'User registered successfully');
-                navigation.navigate('Login'); // Redirect to login page
+                navigation.navigate('Login');
             }
         } catch (error) {
             console.error(error);
@@ -168,34 +151,45 @@ const SignUp = () => {
                         placeholder="Enter your full name"
                         placeholderTextColor="#1B3A4B"
                     />
-                      <Text style={styles.label}>Phone Number:</Text>
-                <View style={styles.otpcontainer}>
-                  
-                    <TextInput
-                        style={[styles.input,styles.phoneinput]}
-                        value={phoneNumber}
-                        onChangeText={setPhoneNumber}
-                        placeholder="Enter your Phone Number"
-                        placeholderTextColor="#1B3A4B"
-                        keyboardType="number-pad"
-                    /> 
-                    <TouchableOpacity style={[styles.button,styles.sendotp]} onPress={handleSendOtp}>
-                        <Text style={styles.buttonText}>Send OTP</Text>
-                    </TouchableOpacity>
-                </View>
 
-                {showOtpInput && (
+                    {/* ── NEW: Email field placed before phone number ── */}
+                    <Text style={styles.label}>Email Address:</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={email}
+                        onChangeText={setEmail}
+                        placeholder="Enter your email address"
+                        placeholderTextColor="#1B3A4B"
+                        keyboardType="email-address"
+                        autoCapitalize="none"
+                    />
+
+                    <Text style={styles.label}>Phone Number:</Text>
+                    <View style={styles.otpcontainer}>
+                        <TextInput
+                            style={[styles.input, styles.phoneinput]}
+                            value={phoneNumber}
+                            onChangeText={setPhoneNumber}
+                            placeholder="Enter your Phone Number"
+                            placeholderTextColor="#1B3A4B"
+                            keyboardType="number-pad"
+                        /> 
+                        <TouchableOpacity style={[styles.button, styles.sendotp]} onPress={handleSendOtp}>
+                            <Text style={styles.buttonText}>Send OTP</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    {showOtpInput && (
                         <>
                             <Text style={styles.label}>OTP:</Text>
                             <TextInput
                                 style={[styles.input, otpVerified && styles.disabledInput]}
-
                                 value={otp}
                                 onChangeText={setOtp}
                                 placeholder="Enter OTP"
                                 placeholderTextColor="#1B3A4B"
                                 keyboardType="numeric"
-                                editable={!otpVerified} // Disable the input if OTP is verified
+                                editable={!otpVerified}
                             />
                         </>
                     )}
@@ -207,9 +201,12 @@ const SignUp = () => {
                         onChangeText={setPassword}
                         placeholder="Enter your password"
                         placeholderTextColor="#1B3A4B"
-                        secureTextEntry = {!viewPassword}
+                        secureTextEntry={!viewPassword}
                     />
-                    <Text style={[styles.option,styles.boldText]} onPress={() => setViewPassword(!viewPassword)} >{viewPassword?'Hide Password':'Show Password'}</Text>
+                    <Text style={[styles.option, styles.boldText]} onPress={() => setViewPassword(!viewPassword)}>
+                        {viewPassword ? 'Hide Password' : 'Show Password'}
+                    </Text>
+
                     <View style={styles.rowContainer}>
                         <View style={styles.ageContainer}>
                             <Text style={styles.label}>Age:</Text>
@@ -240,33 +237,30 @@ const SignUp = () => {
                                 </TouchableOpacity>
                             </View>
                         </View>
-
-
-
                     </View>
 
-                        <Text style={styles.label}>Select Role:</Text>
+                    <Text style={styles.label}>Select Role:</Text>
                     <View style={styles.roleButtons}>
-  {['kid', 'parent', 'hershield', 'senior'].map((item) => (
-    <TouchableOpacity
-      key={item}
-      style={[styles.roleButton, role === item && styles.selectedRole]}
-      onPress={() => setRole(item)}
-    >
-      <Text style={role === item ? styles.selectedRoleText : styles.roleText}>
-        {item.charAt(0).toUpperCase() + item.slice(1)}
-      </Text>
-    </TouchableOpacity>
-  ))}
-</View>
+                        {['kid', 'parent', 'hershield', 'senior'].map((item) => (
+                            <TouchableOpacity
+                                key={item}
+                                style={[styles.roleButton, role === item && styles.selectedRole]}
+                                onPress={() => setRole(item)}
+                            >
+                                <Text style={role === item ? styles.selectedRoleText : styles.roleText}>
+                                    {item.charAt(0).toUpperCase() + item.slice(1)}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
 
-                    <TouchableOpacity  style={styles.button} onPress={handleSignup} activeOpacity={0.8}>
+                    <TouchableOpacity style={styles.button} onPress={handleSignup} activeOpacity={0.8}>
                         <Text style={styles.buttonText}>Sign Up</Text>
                     </TouchableOpacity>
                 </View>
 
                 <Text style={styles.register} onPress={() => navigation.navigate('Login')}>
-                    Already have an account? <Text style={styles.boldText} >Log In</Text>
+                    Already have an account? <Text style={styles.boldText}>Log In</Text>
                 </Text>
             </View>
         </View>
@@ -297,12 +291,10 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
     },
     otpcontainer: {
-        
         flex:1,
         display: 'flex',
         flexDirection: 'row',
         gap: 10
-    
     },
     label: {
         color: '#1B3A4B',
@@ -316,7 +308,6 @@ const styles = StyleSheet.create({
         textAlign: 'right',
         marginBottom: 10,
     },
-
     phoneinput: {
         width:"70%"
     },
@@ -324,14 +315,13 @@ const styles = StyleSheet.create({
         width:"30%"
     },
     disabledInput: {
-        backgroundColor: '#d4f5d4', // Light green background
-        color: '#2e7d32',          // Dark green text color
-        borderColor: '#1b5e20',    // Darker green border
+        backgroundColor: '#d4f5d4',
+        color: '#2e7d32',
+        borderColor: '#1b5e20',
     },
-    
     input: {
         height: 40,
-        borderRadius: 10, // Curved corners
+        borderRadius: 10,
         marginBottom: 10,
         color: '#1B3A4B',
         paddingHorizontal: 10,
@@ -366,7 +356,6 @@ const styles = StyleSheet.create({
     },
     selectedGender: {
         backgroundColor: '#1B3A4B',
-        
     },
     selectedGenderText: {
         color: 'white',
@@ -376,27 +365,26 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     roleButtons: {
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  marginVertical: 10,
-},
-roleButton: {
-  backgroundColor: '#E5E7EB',
-  padding: 10,
-  borderRadius: 10,
-  marginHorizontal: 5,
-},
-selectedRole: {
-  backgroundColor: '#A78BFA',
-},
-roleText: {
-  color: '#1F2937',
-},
-selectedRoleText: {
-  color: '#fff',
-  fontWeight: 'bold',
-},
-
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginVertical: 10,
+    },
+    roleButton: {
+        backgroundColor: '#E5E7EB',
+        padding: 10,
+        borderRadius: 10,
+        marginHorizontal: 5,
+    },
+    selectedRole: {
+        backgroundColor: '#A78BFA',
+    },
+    roleText: {
+        color: '#1F2937',
+    },
+    selectedRoleText: {
+        color: '#fff',
+        fontWeight: 'bold',
+    },
     register: {
         color: '#1B3A4B',
         fontSize: 16,
@@ -407,14 +395,14 @@ selectedRoleText: {
     },
     button: {
         backgroundColor: '#d7d0ff',
-        borderRadius: 10, // Curved corners
+        borderRadius: 10,
         paddingVertical: 10,
         paddingHorizontal: 20,
         marginBottom: 20,
-        alignItems: 'center', // Center the text horizontally
+        alignItems: 'center',
     },
     buttonText: {
-        color: '#000', // Text color for the button
+        color: '#000',
         fontSize: 16,
         fontWeight: 'bold',
     }

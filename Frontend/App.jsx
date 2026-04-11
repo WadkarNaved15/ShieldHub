@@ -12,6 +12,7 @@ const { decodeToken } = require('./functions/token');
 const LogoScreen = require('./Screens/LogoScreen');
 const LoginScreen = require('./Screens/Login');
 const SignUpScreen = require('./Screens/SignUp');
+
 const HomeScreen = require('./Screens/HerShield/Home');
 const HerShieldHeroes = require('./Screens/HerShield/HerShieldHeroes');
 const Achievements = require('./Screens/HerShield/Achievements');
@@ -46,6 +47,7 @@ import firebase from '@react-native-firebase/app';
 import notifee, { AndroidImportance } from '@notifee/react-native';
 import ResponderMap from './Screens/ResponderMap';
 import VictimTracking from './Screens/VictimTracking';
+import SecuritySetup from './Screens/SecuritySetup'; // capital S
 
 
 const EmergencyInfo = require('./Screens/HerShield/EmergencyInfo');
@@ -305,6 +307,7 @@ useEffect(() => {
         <Stack.Screen name="Logo" component={LogoScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="SignUp" component={SignUpScreen} />
+        <Stack.Screen name="SecuritySetup" component={SecuritySetup} />
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="HerShieldHeroes" component={HerShieldHeroes} />
         <Stack.Screen name="CrimeReports" component={CrimeReportsScreen} />

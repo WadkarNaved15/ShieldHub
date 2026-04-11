@@ -2,6 +2,7 @@ const { verifyAccessToken } = require('../utils/jwt');
 
 function getUserFromToken(req) {
   const token = req.headers.authorization;
+  console.log("🔍 Extracting user from token:", token);
   if (!token || !token.startsWith('Bearer ')) {
     throw { status: 401, message: 'Unauthorized' };
   }
