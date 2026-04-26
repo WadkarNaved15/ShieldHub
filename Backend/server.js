@@ -28,6 +28,7 @@ const path = require('path');
 const { initializeCheckIns } = require('./Functions/FeelingUnsafe');
 initializeCheckIns();
 const {getIO, initializeSocket} = require('./utils/socket');
+const pairingRoutes = require("./routes/ParingRoutes");
 
 require('dotenv').config(); // To load environment variables from a .env file
 

@@ -3,7 +3,8 @@ import messaging from '@react-native-firebase/messaging';
 import App from './App';
 import { name as appName } from './app.json';
 import notifee, { AndroidImportance, AndroidVisibility, EventType } from '@notifee/react-native';
-
+import { SosWidget } from './Components/sosWidget';
+import { registerWidgetTaskHandler } from 'react-native-android-widget';
 
 
 // 1. Notifee Background Event Handler (Fixes your warning)
@@ -25,6 +26,23 @@ notifee.onBackgroundEvent(async ({ type, detail }) => {
   }
   
 });
+
+
+const widgetTaskHandler = async (props) => {
+  const widgetInfo = props.widgetInfo;
+  const widgetAction = props.widgetAction;
+
+  if (widgetAction === 'TRIGGER_SOS_ACTION') {
+    // TODO: Your HerShield emergency code goes here!
+    // Fetch location, send SMS via a background API, sound alarm, etc.
+    console.log("SOS TRIGGERED FROM WIDGET!");
+  }
+
+  // 2. Render the widget UI
+  props.renderWidget(<SosWidget />);
+};
+
+registerWidgetTaskHandler(widgetTaskHandler);
 
 // ✅ MUST be outside App
 
